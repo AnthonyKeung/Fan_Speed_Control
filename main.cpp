@@ -1,5 +1,7 @@
 
 #include "mbed.h"
+#include "TemperatureSensor.h"
+
 
 enum Mode
 {
@@ -12,6 +14,7 @@ Mode mode = CLOSEDLOOP;
 DigitalOut led1(LED1);
 DigitalOut led2(PC_0);
 InterruptIn button(BUTTON1);
+TemperatureSensor TempSense(24);
 
 void BUTTONINTERUPT()
 {
@@ -23,17 +26,22 @@ void BUTTONINTERUPT()
     {
         mode = CLOSEDLOOP;
     }
-    wait_us(2000);
+    wait_us(5000);
 }
+
+
 
 int main()
 {
     led1 = 0;
     led2 = 0;
     button.rise(&BUTTONINTERUPT);
-    
+    TempSense.checkSensorConnected();
     while (true) 
     {
+        TempSense.read();
+        printf("The current Temperature is %d" ,TempSense.getTemperatureReading());
+        printf("The mode is %d \n" , mode);
         if (mode == CLOSEDLOOP)
         {
             led1 = 1;
