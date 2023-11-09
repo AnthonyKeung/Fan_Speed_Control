@@ -1,53 +1,52 @@
 
 #include "mbed.h"
+#include <chrono>
+#include <cstdint>
+#include <type_traits>
 
-enum Mode
-{
-    CLOSEDLOOP = 0,
-    OPENLOOP = 1,
-    SLOWCONTROL = 2
-};
+#include "Interrupts.h"
+#include "EnumDef.h"
+#include "RotaryEncoder.h"
 
-Mode mode = CLOSEDLOOP;
-DigitalOut led1(LED1);
-DigitalOut led2(PC_0);
-InterruptIn button(BUTTON1);
+#define REFRESH_RATE     100ms
+#define LED2 PC_0
 
-void BUTTONINTERUPT()
-{
-    if (mode < 2)
-    {
-        mode = static_cast<Mode>(mode + 1);
-    }
-    else
-    {
-        mode = CLOSEDLOOP;
-    }
-    wait_us(2000);
+BufferedSerial mypc(USBTX, USBRX); 
+BusOut leds(LED1,LED2);
+mRotaryEncoder REnc(PA_1, PA_4, PC_1, PullUp, 1500);
+bool enc_rotated = false;      // rotary encoder was totaded left or right
+int pulseCount;
+
+//interrup-Handler for rotary-encoder rotation
+void trigger_rotated() {
+    enc_rotated = true;               // just set the flag, rest is done outside isr
 }
 
 int main()
 {
-    led1 = 0;
-    led2 = 0;
-    button.rise(&BUTTONINTERUPT);
-    
+    leds.write(0x0);
+    enable_Button();
+    REnc.attachROT(&trigger_rotated);
+
+    /*
+    enable_RotEnc_ARISE();
+    enable_RotEnc_AFALL();
+    enable_RotEnc_BFALL();
+    enable_RotEnc_BRISE();*/
+
     while (true) 
     {
-        if (mode == CLOSEDLOOP)
-        {
-            led1 = 1;
-            led2 = 0;
-        }
-        else if (mode == OPENLOOP)
-        {
-            led1 = 0;
-            led2 = 1;
-        }
-        else if (mode == SLOWCONTROL)
-        {
-            led1 = 1;
-            led2 = 1;
-        }
+        ThisThread::sleep_for(REFRESH_RATE);
+        
+        leds.write(getMode() + 1);   
+
+        //printf( "The encoder count is %d\n", int(REnc.Get() ));         
+        // shaft has been rotated?
+        if (enc_rotated) {
+            enc_rotated = false;
+            pulseCount = REnc.Get();
+            printf ("Pulses is: %i\n\r", pulseCount);
+
+        }           
     }
 }
