@@ -1,7 +1,13 @@
 
 #include "mbed.h"
+#include <chrono>
+#include <cstdint>
 
-enum Mode
+#define REFRESH_RATE     50ms
+#define DEBOUNCE_TIMER     10ms
+#define LED2 PC_0
+
+enum Mode : int
 {
     CLOSEDLOOP = 0,
     OPENLOOP = 1,
@@ -9,45 +15,35 @@ enum Mode
 };
 
 Mode mode = CLOSEDLOOP;
-DigitalOut led1(LED1);
-DigitalOut led2(PC_0);
+BusOut leds(LED1,LED2);
 InterruptIn button(BUTTON1);
+Timeout debounce_Switch;
 
-void BUTTONINTERUPT()
+void enable_Switch(); // declare function to reference in BUTTONINTERRUPT
+
+void BUTTONINTERRUPT()
 {
-    if (mode < 2)
-    {
-        mode = static_cast<Mode>(mode + 1);
-    }
-    else
-    {
-        mode = CLOSEDLOOP;
-    }
-    wait_us(2000);
+    mode = Mode (fmod((int(mode) + 1), 3));
+
+    button.rise(NULL);
+    debounce_Switch.attach(&enable_Switch, DEBOUNCE_TIMER);
+}
+
+void enable_Switch() // define function called in BUTTONINTERRUPT
+{
+    button.rise(&BUTTONINTERRUPT);
+    debounce_Switch.detach();
 }
 
 int main()
 {
-    led1 = 0;
-    led2 = 0;
-    button.rise(&BUTTONINTERUPT);
+    leds.write(0x0);
+    button.rise(&BUTTONINTERRUPT);
     
     while (true) 
     {
-        if (mode == CLOSEDLOOP)
-        {
-            led1 = 1;
-            led2 = 0;
-        }
-        else if (mode == OPENLOOP)
-        {
-            led1 = 0;
-            led2 = 1;
-        }
-        else if (mode == SLOWCONTROL)
-        {
-            led1 = 1;
-            led2 = 1;
-        }
+        ThisThread::sleep_for(REFRESH_RATE);
+        
+        leds.write(int(mode) + 1);         
     }
 }
