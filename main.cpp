@@ -14,11 +14,12 @@
 BufferedSerial mypc(USBTX, USBRX); 
 BusOut leds(LED1,LED2);
 mRotaryEncoder REnc(PA_1, PA_4, PC_1, PullUp, 1500);
-bool enc_rotated = false;      // rotary encoder was totaded left or right
+bool enc_rotated = false;      // rotary encoder was rotated left or right
 int pulseCount;
 
 //interrup-Handler for rotary-encoder rotation
-void trigger_rotated() {
+void trigger_rotated() 
+{
     enc_rotated = true;               // just set the flag, rest is done outside isr
 }
 
@@ -28,25 +29,18 @@ int main()
     enable_Button();
     REnc.attachROT(&trigger_rotated);
 
-    /*
-    enable_RotEnc_ARISE();
-    enable_RotEnc_AFALL();
-    enable_RotEnc_BFALL();
-    enable_RotEnc_BRISE();*/
-
     while (true) 
     {
         ThisThread::sleep_for(REFRESH_RATE);
         
         leds.write(getMode() + 1);   
-
-        //printf( "The encoder count is %d\n", int(REnc.Get() ));         
+      
         // shaft has been rotated?
-        if (enc_rotated) {
+        if (enc_rotated) 
+        {
             enc_rotated = false;
             pulseCount = REnc.Get();
             printf ("Pulses is: %i\n\r", pulseCount);
-
         }           
     }
 }
