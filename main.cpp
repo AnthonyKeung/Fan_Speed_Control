@@ -13,6 +13,7 @@
 
 BufferedSerial mypc(USBTX, USBRX); 
 BusOut leds(LED1,LED2);
+PwmOut FanPWM(PB_0);
 mRotaryEncoder REnc(PA_1, PA_4, PC_1, PullUp, 1500);
 bool enc_rotated = false;      // rotary encoder was rotated left or right
 int pulseCount;
@@ -41,6 +42,15 @@ int main()
             enc_rotated = false;
             pulseCount = REnc.Get();
             printf ("Pulses is: %i\n\r", pulseCount);
-        }           
+        }
+
+        if (getMode() == 0)    
+        {
+            FanPWM = 1.0;
+        }  
+        else
+        {
+            FanPWM = 0.0;
+        }     
     }
 }
