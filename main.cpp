@@ -27,7 +27,8 @@ void trigger_rotated()
 int main()
 {
     leds.write(0x0);
-    enable_Button();
+    ENABLEBUTTON();
+    ENABLETACO();
     REnc.attachROT(&trigger_rotated);
 
     while (true) 
@@ -43,6 +44,8 @@ int main()
             pulseCount = REnc.Get();
             printf ("Pulses is: %i\n\r", pulseCount);
         }
+        
+        printf ("Pulses is: %i\n\r", getRevs(true));
 
         if (getMode() == 0)    
         {
