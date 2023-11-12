@@ -10,8 +10,7 @@
 
 #define REFRESH_RATE     100ms
 #define LED2 PC_0
-
-BufferedSerial mypc(USBTX, USBRX); 
+ 
 BusOut leds(LED1,LED2);
 mRotaryEncoder REnc(PA_1, PA_4, PC_1, PullUp, 1500);
 TemperatureSensor TempSense(24);
@@ -35,7 +34,7 @@ int main()
     enable_Button();
     REnc.attachROT(&trigger_rotated);
 
-        if (TempSense.checkSensorConnected())
+    if (TempSense.checkSensorConnected())
     {
         fprintf(mypcFile1, "The sensor is succesfully connected \n");
         wait_us(1000000);
@@ -49,11 +48,13 @@ int main()
     while (true) 
     {
         ThisThread::sleep_for(REFRESH_RATE);
-        
         leds.write(getMode() + 1);   
-        TempSense.read();
-        fprintf(mypcFile1,"The current Temperature is %d \n" ,TempSense.getTemperatureReading());
-      
+
+        if (getMode() == CLOSEDLOOP)
+        {
+            TempSense.read();
+            fprintf(mypcFile1,"The current Temperature is %d \n" ,TempSense.getTemperatureReading());
+        }
         // shaft has been rotated?
         if (enc_rotated) 
         {

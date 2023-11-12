@@ -12,7 +12,6 @@ void TemperatureSensor::read()
     char data[2];
     i2c.read(TemperatureSensorAddress, data, 1); 
     currentTemperature = data[0];
-    wait_us(100000); 
 }
 
 int TemperatureSensor::getTemperatureReading()
