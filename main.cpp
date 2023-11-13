@@ -8,7 +8,7 @@
 #include "EnumDef.h"
 #include "RotaryEncoder.h"
 
-#define REFRESH_RATE     100ms
+#define REFRESH_RATE     1000ms
 #define LED2 PC_0
 
 BufferedSerial mypc(USBTX, USBRX); 
@@ -30,6 +30,7 @@ int main()
     ENABLEBUTTON();
     ENABLETACO();
     REnc.attachROT(&trigger_rotated);
+    startTimer();    
 
     while (true) 
     {
@@ -45,7 +46,8 @@ int main()
             printf ("Pulses is: %i\n\r", pulseCount);
         }
         
-        printf ("Pulses is: %i\n\r", getRevs(true));
+        //
+        printf ("RPM is: %i\n\r", getRPM(true));
 
         if (getMode() == 0)    
         {
