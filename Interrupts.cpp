@@ -9,10 +9,13 @@ Mode mode = CLOSEDLOOP;
 
 InterruptIn button(BUTTON1);
 InterruptIn taco(PA_0);
+InterruptIn tacoPWM(PA_9);
 Timeout debounce_Button;
 Timer timer;
 
 int revolutions = 0;
+int totalRevolutions = 0;
+float dutyCycle = 0;
 
 //---------------------------------------BUTTON INTERRUPTS---------------------------------------
 
@@ -43,21 +46,44 @@ void ENABLETACO() // define function called in BUTTONINTERRUPT
     taco.rise(&TACOINTERRUPT);
 }
 
+void PWMTACOHIGH()
+{
+    revolutions=0;
+};
+
+void PWMTACOLOW()
+{
+    if (dutyCycle != 0)
+    {
+        totalRevolutions = totalRevolutions + float(revolutions)/dutyCycle;
+    }
+    revolutions = 0;
+};
+
+void ENABLEPWM()
+{
+    tacoPWM.rise(&PWMTACOHIGH);
+    tacoPWM.fall(&PWMTACOLOW);
+    timer.start();
+};
+
 //---------------------------------------Subroutines---------------------------------------
 
-void startTimer()
+void dutyCycleUpdate(float dcIn)
 {
-    timer.start();
+    dutyCycle = dcIn;
 }
 
 //---------------------------------------GETTERS---------------------------------------
 
 int getRevs(bool reset = true)
 {   
-    int tempRevs = revolutions;
+    PWMTACOLOW();
+    int tempRevs = totalRevolutions;
     if (reset)
     {
         revolutions = 0;
+        totalRevolutions = 0;
         timer.reset();
     }
     return tempRevs;
@@ -65,11 +91,13 @@ int getRevs(bool reset = true)
 
 int getRPM(bool reset = true)
 {
-    float elapsedTime = 250000 / static_cast<float>(timer.elapsed_time().count()) ; //4 ticks per rev, 1000000 / 4
-    int RPM = int(float(revolutions * 60 * elapsedTime)); // 60 seconds per minute, 
+    PWMTACOLOW();
+    float elapsedTime =  15000000 / static_cast<float>(timer.elapsed_time().count()) ; //4 ticks per rev, 1000000 / 4
+    int RPM = int(totalRevolutions * elapsedTime); // 
     if (reset)
     {
         revolutions = 0;
+        totalRevolutions = 0;
         timer.reset();
     }
     return RPM;

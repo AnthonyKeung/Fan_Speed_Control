@@ -6,7 +6,13 @@ void ENABLETACO();
 
 void TACOINTERRUPT();
 
-void startTimer();
+void PWMTACOHIGH();
+
+void PWMTACOLOW();
+
+void ENABLEPWM();
+
+void dutyCycleUpdate(float dcIn);
 
 int getRevs(bool reset);
 

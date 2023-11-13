@@ -11,7 +11,7 @@
 #define REFRESH_RATE     1000ms
 #define LED2 PC_0
 
-BufferedSerial mypc(USBTX, USBRX); 
+BufferedSerial mypc(USBTX, USBRX);
 BusOut leds(LED1,LED2);
 PwmOut FanPWM(PB_0);
 mRotaryEncoder REnc(PA_1, PA_4, PC_1, PullUp, 1500);
@@ -29,12 +29,15 @@ int main()
     leds.write(0x0);
     ENABLEBUTTON();
     ENABLETACO();
+    ENABLEPWM();
     REnc.attachROT(&trigger_rotated);
-    startTimer();    
+    FanPWM = 0.0;
+    FanPWM.period_ms(1);
 
     while (true) 
     {
         ThisThread::sleep_for(REFRESH_RATE);
+        dutyCycleUpdate(FanPWM.read()); 
         
         leds.write(getMode() + 1);   
       
@@ -47,11 +50,15 @@ int main()
         }
         
         //
+        printf ("Revs is: %i\n\r", getRevs(false));
         printf ("RPM is: %i\n\r", getRPM(true));
 
         if (getMode() == 0)    
         {
-            FanPWM = 1.0;
+            /*if ( FanPWM.read() >= 0.5){
+                FanPWM=0;
+            }&*/
+            FanPWM = 0.2;//FanPWM + 0.05;
         }  
         else
         {
