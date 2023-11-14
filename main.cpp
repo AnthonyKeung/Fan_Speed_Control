@@ -7,16 +7,18 @@
 #include "Interrupts.h"
 #include "EnumDef.h"
 #include "RotaryEncoder.h"
+#include "FanControl.h"
 
 #define REFRESH_RATE     1000ms
 #define LED2 PC_0
 
 BufferedSerial mypc(USBTX, USBRX);
 BusOut leds(LED1,LED2);
-PwmOut FanPWM(PB_0);
 mRotaryEncoder REnc(PA_1, PA_4, PC_1, PullUp, 1500);
+
 bool enc_rotated = false;      // rotary encoder was rotated left or right
-int pulseCount;
+int pulseCount = 0;
+float DutyCycle = 1.0;
 
 //interrup-Handler for rotary-encoder rotation
 void trigger_rotated() 
@@ -31,13 +33,12 @@ int main()
     ENABLETACO();
     ENABLEPWM();
     REnc.attachROT(&trigger_rotated);
-    FanPWM = 0.0;
-    FanPWM.period_ms(1);
+    enablePWMsignal(1.0);
 
     while (true) 
     {
         ThisThread::sleep_for(REFRESH_RATE);
-        dutyCycleUpdate(FanPWM.read()); 
+        dutyCycleUpdate(DutyCycle); 
         
         leds.write(getMode() + 1);   
       
@@ -55,14 +56,16 @@ int main()
 
         if (getMode() == 0)    
         {
-            /*if ( FanPWM.read() >= 0.5){
-                FanPWM=0;
-            }&*/
-            FanPWM = 0.2;//FanPWM + 0.05;
+            DutyCycle = 1.0;
+        }  
+        else if (getMode() == 1)    
+        {
+            DutyCycle = 0.5;
         }  
         else
         {
-            FanPWM = 0.0;
-        }     
+            DutyCycle = 0.0;
+        }    
+        setPulsePeriod(DutyCycle); 
     }
 }

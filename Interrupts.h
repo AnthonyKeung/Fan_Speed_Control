@@ -1,3 +1,4 @@
+
 void ENABLEBUTTON();
 
 void BUTTONINTERRUPT();
@@ -7,10 +8,12 @@ void ENABLETACO();
 void TACOINTERRUPT();
 
 void PWMTACOHIGH();
-
 void PWMTACOLOW();
 
 void ENABLEPWM();
+
+void PINSTATUSHIGH();
+void PINSTATUSLOW();
 
 void dutyCycleUpdate(float dcIn);
 

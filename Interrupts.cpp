@@ -1,20 +1,20 @@
 #include "mbed.h"
-
 #include "Interrupts.h"
 #include "EnumDef.h"
 
 #define DEBOUNCE_TIMER     100ms
 
-Mode mode = CLOSEDLOOP;
-
 InterruptIn button(BUTTON1);
 InterruptIn taco(PA_0);
 InterruptIn tacoPWM(PA_9);
+DigitalOut PWMpin(PB_0);
+
 Timeout debounce_Button;
 Timer timer;
+bool revCountEnable = false;
 
+Mode mode = CLOSEDLOOP;
 int revolutions = 0;
-int totalRevolutions = 0;
 float dutyCycle = 0;
 
 //---------------------------------------BUTTON INTERRUPTS---------------------------------------
@@ -24,8 +24,7 @@ void BUTTONINTERRUPT()
     button.rise(NULL);
 
     mode = Mode (fmod((int(mode) + 1), 3));
-    
-    debounce_Button.attach(&ENABLEBUTTON, DEBOUNCE_TIMER);
+        debounce_Button.attach(&ENABLEBUTTON, DEBOUNCE_TIMER);
 }
 
 void ENABLEBUTTON() // define function called in BUTTONINTERRUPT
@@ -38,7 +37,10 @@ void ENABLEBUTTON() // define function called in BUTTONINTERRUPT
 
 void TACOINTERRUPT() // define function called in BUTTONINTERRUPT
 {
-    revolutions++;
+    if (revCountEnable)
+    {
+        revolutions++;
+    }    
 }
 
 void ENABLETACO() // define function called in BUTTONINTERRUPT
@@ -48,24 +50,33 @@ void ENABLETACO() // define function called in BUTTONINTERRUPT
 
 void PWMTACOHIGH()
 {
-    revolutions=0;
+    timer.start();
+    revCountEnable = true;
 };
 
 void PWMTACOLOW()
 {
-    if (dutyCycle != 0)
-    {
-        totalRevolutions = totalRevolutions + float(revolutions)/dutyCycle;
-    }
-    revolutions = 0;
+    timer.stop();
+    revCountEnable = false;
 };
 
 void ENABLEPWM()
 {
     tacoPWM.rise(&PWMTACOHIGH);
     tacoPWM.fall(&PWMTACOLOW);
-    timer.start();
 };
+
+//---------------------------------------FAN PWM INTERRUPTS---------------------------------------
+
+void PINSTATUSHIGH()
+{
+    PWMpin = 1;
+}
+
+void PINSTATUSLOW()
+{
+    PWMpin = 0;
+}
 
 //---------------------------------------Subroutines---------------------------------------
 
@@ -78,12 +89,12 @@ void dutyCycleUpdate(float dcIn)
 
 int getRevs(bool reset = true)
 {   
-    PWMTACOLOW();
-    int tempRevs = totalRevolutions;
+    //PWMTACOLOW();
+    int tempRevs = revolutions;
     if (reset)
     {
         revolutions = 0;
-        totalRevolutions = 0;
+        timer.stop();
         timer.reset();
     }
     return tempRevs;
@@ -91,13 +102,12 @@ int getRevs(bool reset = true)
 
 int getRPM(bool reset = true)
 {
-    PWMTACOLOW();
-    float elapsedTime =  15000000 / static_cast<float>(timer.elapsed_time().count()) ; //4 ticks per rev, 1000000 / 4
-    int RPM = int(totalRevolutions * elapsedTime); // 
+    //PWMTACOLOW();
+    float elapsedTime =  30000000 / static_cast<float>(timer.elapsed_time().count()) ; //2 ticks per rev, 1000000 / 4, * 60 secs
+    int RPM = int(revolutions * elapsedTime); // 
     if (reset)
     {
         revolutions = 0;
-        totalRevolutions = 0;
         timer.reset();
     }
     return RPM;
