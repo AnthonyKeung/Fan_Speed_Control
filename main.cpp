@@ -18,7 +18,8 @@ mRotaryEncoder REnc(PA_1, PA_4, PC_1, PullUp, 1500);
 
 bool enc_rotated = false;      // rotary encoder was rotated left or right
 int pulseCount = 0;
-float DutyCycle = 1.0;
+int DutyCycle = 100;
+int prevDutyCycle = 0;
 
 //interrup-Handler for rotary-encoder rotation
 void trigger_rotated() 
@@ -33,7 +34,9 @@ int main()
     ENABLETACO();
     ENABLEPWM();
     REnc.attachROT(&trigger_rotated);
-    enablePWMsignal(1.0);
+    REnc.Set(50);
+    pulseCount = REnc.Get();
+    setPulsePeriod(0);    
 
     while (true) 
     {
@@ -50,22 +53,30 @@ int main()
             printf ("Pulses is: %i\n\r", pulseCount);
         }
         
-        //
+        
+        printf ("Pulse Period in us: %i\n\r", getPP());
+        printf ("Pulse Period in us: %i\n\r", getPwmP());
+        printf ("Rot Enc is at: %i\n\r", pulseCount);
         printf ("Revs is: %i\n\r", getRevs(false));
         printf ("RPM is: %i\n\r", getRPM(true));
 
         if (getMode() == 0)    
         {
-            DutyCycle = 1.0;
+            DutyCycle = 100;
         }  
         else if (getMode() == 1)    
         {
-            DutyCycle = 0.5;
+            DutyCycle = pulseCount;
         }  
         else
         {
-            DutyCycle = 0.0;
+            DutyCycle = 0;
         }    
-        setPulsePeriod(DutyCycle); 
+
+        if (DutyCycle != prevDutyCycle)
+        {
+            setPulsePeriod(DutyCycle); 
+            prevDutyCycle = DutyCycle;
+        }
     }
 }

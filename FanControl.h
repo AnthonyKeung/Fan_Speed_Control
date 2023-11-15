@@ -1,4 +1,5 @@
 
-void enablePWMsignal(float DutyCycle);
-void setPulsePeriod(float DutyCycle);
+void setPulsePeriod(int DutyCycle);
 void offsetLow();
+int getPP();
+int getPwmP();

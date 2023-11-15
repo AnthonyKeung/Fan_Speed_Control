@@ -2,41 +2,73 @@
 #include "mbed.h"
 #include "Interrupts.h"
 #include <chrono>
+#include <cmath>
 #include <ratio>
+#include "platform/mbed_critical.h"
 
-const chrono::microseconds PWMPERIOD = 100us;
+
+chrono::microseconds PWMPERIOD = 10000us;
+chrono::microseconds pulsePeriod = PWMPERIOD;
 
 Ticker PWMHigh;
 Ticker PWMLow;
 Timeout PWMOffset;
-
-void enablePWMsignal(float DutyCycle)
-{//const std::chrono::duration<long, std::micro> int_usec = int_ms;
-    //std::chrono::duration<int, std::micro> 
-    auto pulsePeriod = (DutyCycle * PWMPERIOD);
-    if (DutyCycle > 0)
-    {
-        PWMHigh.attach(&PINSTATUSHIGH,PWMPERIOD);
-        if (DutyCycle < 1)
-        {
-            PWMOffset.attach_us(&offsetLow,pulsePeriod.count());
-        }
-    }
-    else
-    {
-        PINSTATUSLOW();
-    }    
-}
 
 void offsetLow()
 {
     PWMLow.attach(&PINSTATUSLOW,PWMPERIOD);
 }
 
-void setPulsePeriod(float DutyCycle)
+void setPulsePeriod(int DutyCycle)
 {
     PWMHigh.detach();   
     PWMLow.detach();
     PWMOffset.detach(); 
-    enablePWMsignal(DutyCycle);
+    PWMPERIOD = std::chrono::microseconds( int(1000000/pow(DutyCycle,1.5)) );
+    /*
+    if (DutyCycle < 10)
+    {
+        PWMPERIOD = std::chrono::microseconds(100000/DutyCycle);
+    }
+    else if (DutyCycle < 20)
+    {
+        PWMPERIOD = std::chrono::microseconds( 250000);
+    }
+    else if (DutyCycle < 30)
+    {
+        PWMPERIOD = std::chrono::microseconds( 100000);
+    }
+    else if (DutyCycle < 40)
+    {
+        PWMPERIOD = std::chrono::microseconds(  25000);
+    }
+    else
+    {
+        PWMPERIOD = std::chrono::microseconds(   1000);
+    }*/
+
+
+    pulsePeriod = std::chrono::microseconds(PWMPERIOD.count() * DutyCycle / 100) - 60us;
+
+    if (DutyCycle > 0)
+    {
+        PWMHigh.attach(&PINSTATUSHIGH,PWMPERIOD);
+        if (DutyCycle < 100)
+        {
+            PWMOffset.attach(&offsetLow,pulsePeriod);
+        }
+    }
+    else
+    {
+        PINSTATUSLOW();
+    }  
+}
+
+int getPP()
+{
+    return pulsePeriod.count();
+}
+int getPwmP()
+{
+    return PWMPERIOD.count();
 }

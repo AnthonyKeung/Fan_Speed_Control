@@ -37,7 +37,7 @@ void ENABLEBUTTON() // define function called in BUTTONINTERRUPT
 
 void TACOINTERRUPT() // define function called in BUTTONINTERRUPT
 {
-    if (revCountEnable)
+    if (true)//(revCountEnable)
     {
         revolutions++;
     }    
@@ -45,18 +45,18 @@ void TACOINTERRUPT() // define function called in BUTTONINTERRUPT
 
 void ENABLETACO() // define function called in BUTTONINTERRUPT
 {
-    taco.rise(&TACOINTERRUPT);
+    taco.fall(&TACOINTERRUPT);
 }
 
 void PWMTACOHIGH()
 {
-    timer.start();
+    //timer.start();
     revCountEnable = true;
 };
 
 void PWMTACOLOW()
 {
-    timer.stop();
+    //timer.stop();
     revCountEnable = false;
 };
 
@@ -64,19 +64,23 @@ void ENABLEPWM()
 {
     tacoPWM.rise(&PWMTACOHIGH);
     tacoPWM.fall(&PWMTACOLOW);
+    timer.start();
 };
 
 //---------------------------------------FAN PWM INTERRUPTS---------------------------------------
 
 void PINSTATUSHIGH()
 {
+    core_util_critical_section_enter();
     PWMpin = 1;
+    core_util_critical_section_exit();
 }
 
 void PINSTATUSLOW()
 {
+    core_util_critical_section_enter();
     PWMpin = 0;
-}
+    core_util_critical_section_exit();}
 
 //---------------------------------------Subroutines---------------------------------------
 
@@ -94,7 +98,7 @@ int getRevs(bool reset = true)
     if (reset)
     {
         revolutions = 0;
-        timer.stop();
+        //timer.stop();
         timer.reset();
     }
     return tempRevs;
@@ -102,9 +106,9 @@ int getRevs(bool reset = true)
 
 int getRPM(bool reset = true)
 {
-    //PWMTACOLOW();
-    float elapsedTime =  30000000 / static_cast<float>(timer.elapsed_time().count()) ; //2 ticks per rev, 1000000 / 4, * 60 secs
-    int RPM = int(revolutions * elapsedTime); // 
+    //float elapsedTime =  (float(1000000) / 2 * 60) / static_cast<float>(timer.elapsed_time().count()) ; //2 ticks per rev, 1000000 / 4, * 60 secs
+    float elapsedTime = static_cast<float>(timer.elapsed_time().count()) * 60 / 2 / 1000000 ; //60 secs, 2 ticks a rev, 1000000 us per s
+    int RPM = int(float(revolutions) * elapsedTime); // 
     if (reset)
     {
         revolutions = 0;
