@@ -54,7 +54,7 @@ int main()
         }
         
         
-        printf ("Pulse Period in us: %i\n\r", getPP());
+        printf ("Pulse Period in us: %i\n\r", (getPP()+60));
         printf ("Pulse Period in us: %i\n\r", getPwmP());
         printf ("Rot Enc is at: %i\n\r", pulseCount);
         printf ("Revs is: %i\n\r", getRevs(false));

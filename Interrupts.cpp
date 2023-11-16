@@ -10,12 +10,15 @@ InterruptIn tacoPWM(PA_9);
 DigitalOut PWMpin(PB_0);
 
 Timeout debounce_Button;
+Timeout tacoBounce;
 Timer timer;
+Timer pulseTimer;
 bool revCountEnable = false;
 
 Mode mode = CLOSEDLOOP;
 int revolutions = 0;
 float dutyCycle = 0;
+chrono::microseconds tacoPulseDuration = 1ms;
 
 //---------------------------------------BUTTON INTERRUPTS---------------------------------------
 
@@ -35,35 +38,51 @@ void ENABLEBUTTON() // define function called in BUTTONINTERRUPT
 
 //---------------------------------------TACHOMETER INTERRUPTS---------------------------------------
 
+void ENABLEREVCOUNT()
+{
+    revCountEnable = 1;
+}
+
 void TACOINTERRUPT() // define function called in BUTTONINTERRUPT
 {
-    if (true)//(revCountEnable)
+    pulseTimer.reset();
+    if (revCountEnable)
     {
         revolutions++;
-    }    
+    }
+    revCountEnable = 0;    
+}
+
+void TACOPULSEPERIOD()
+{
+    tacoPulseDuration = pulseTimer.elapsed_time();    
+    tacoBounce.attach(&ENABLEREVCOUNT, (tacoPulseDuration-2ms));    
 }
 
 void ENABLETACO() // define function called in BUTTONINTERRUPT
 {
-    taco.fall(&TACOINTERRUPT);
+    taco.rise(&TACOINTERRUPT);
+    taco.fall(&TACOPULSEPERIOD);
+    pulseTimer.reset();
+    pulseTimer.start();
 }
 
 void PWMTACOHIGH()
 {
     //timer.start();
-    revCountEnable = true;
+    //revCountEnable = true;
 };
 
 void PWMTACOLOW()
 {
     //timer.stop();
-    revCountEnable = false;
+    //revCountEnable = false;
 };
 
 void ENABLEPWM()
 {
-    tacoPWM.rise(&PWMTACOHIGH);
-    tacoPWM.fall(&PWMTACOLOW);
+    //tacoPWM.rise(&PWMTACOHIGH);
+    //tacoPWM.fall(&PWMTACOLOW);
     timer.start();
 };
 

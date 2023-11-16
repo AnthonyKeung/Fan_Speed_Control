@@ -7,7 +7,7 @@
 #include "platform/mbed_critical.h"
 
 
-chrono::microseconds PWMPERIOD = 10000us;
+chrono::microseconds PWMPERIOD = 1000us;
 chrono::microseconds pulsePeriod = PWMPERIOD;
 
 Ticker PWMHigh;
@@ -24,7 +24,7 @@ void setPulsePeriod(int DutyCycle)
     PWMHigh.detach();   
     PWMLow.detach();
     PWMOffset.detach(); 
-    PWMPERIOD = std::chrono::microseconds( int(1000000/pow(DutyCycle,1.5)) );
+    //PWMPERIOD = std::chrono::microseconds( int(1000000/pow(DutyCycle,1.5)) );
     /*
     if (DutyCycle < 10)
     {
@@ -49,6 +49,10 @@ void setPulsePeriod(int DutyCycle)
 
 
     pulsePeriod = std::chrono::microseconds(PWMPERIOD.count() * DutyCycle / 100) - 60us;
+    if (pulsePeriod.count()<0)
+    {
+        pulsePeriod=std::chrono::microseconds(0);
+    }
 
     if (DutyCycle > 0)
     {
