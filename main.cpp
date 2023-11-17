@@ -15,6 +15,7 @@
 BufferedSerial mypc(USBTX, USBRX);
 BusOut leds(LED1,LED2);
 mRotaryEncoder REnc(PA_1, PA_4, PC_1, PullUp, 1500);
+PwmOut pwmfan(PB_0);
 
 bool enc_rotated = false;      // rotary encoder was rotated left or right
 int pulseCount = 0;
@@ -36,7 +37,9 @@ int main()
     REnc.attachROT(&trigger_rotated);
     REnc.Set(50);
     pulseCount = REnc.Get();
-    setPulsePeriod(0);    
+    //setPulsePeriod(0);  
+    pwmfan = 0;
+    pwmfan.period_us(1000);
 
     while (true) 
     {
@@ -54,8 +57,8 @@ int main()
         }
         
         
-        printf ("Pulse Period in us: %i\n\r", (getPP()+60));
-        printf ("Pulse Period in us: %i\n\r", getPwmP());
+        printf ("Pulse Period: %i us\n\r", (getPP()+60));
+        printf ("PWM Period:   %i us\n\r", getPwmP());
         printf ("Rot Enc is at: %i\n\r", pulseCount);
         printf ("Revs is: %i\n\r", getRevs(false));
         printf ("RPM is: %i\n\r", getRPM(true));
@@ -75,7 +78,8 @@ int main()
 
         if (DutyCycle != prevDutyCycle)
         {
-            setPulsePeriod(DutyCycle); 
+            //setPulsePeriod(DutyCycle); 
+            pwmfan = (float(DutyCycle)/100);
             prevDutyCycle = DutyCycle;
         }
     }

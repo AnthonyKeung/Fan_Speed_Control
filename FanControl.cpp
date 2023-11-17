@@ -47,7 +47,7 @@ void setPulsePeriod(int DutyCycle)
         PWMPERIOD = std::chrono::microseconds(   1000);
     }*/
 
-
+/*
     pulsePeriod = std::chrono::microseconds(PWMPERIOD.count() * DutyCycle / 100) - 60us;
     if (pulsePeriod.count()<0)
     {
@@ -65,7 +65,7 @@ void setPulsePeriod(int DutyCycle)
     else
     {
         PINSTATUSLOW();
-    }  
+    }  */
 }
 
 int getPP()

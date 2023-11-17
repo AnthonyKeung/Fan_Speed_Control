@@ -7,13 +7,13 @@
 InterruptIn button(BUTTON1);
 InterruptIn taco(PA_0);
 InterruptIn tacoPWM(PA_9);
-DigitalOut PWMpin(PB_0);
+//DigitalOut PWMpin(PB_0);
 
 Timeout debounce_Button;
 Timeout tacoBounce;
 Timer timer;
 Timer pulseTimer;
-bool revCountEnable = false;
+bool revCountEnable = true;
 
 Mode mode = CLOSEDLOOP;
 int revolutions = 0;
@@ -40,29 +40,30 @@ void ENABLEBUTTON() // define function called in BUTTONINTERRUPT
 
 void ENABLEREVCOUNT()
 {
-    revCountEnable = 1;
+    revCountEnable = true;
 }
 
 void TACOINTERRUPT() // define function called in BUTTONINTERRUPT
 {
+    revolutions++;
     pulseTimer.reset();
-    if (revCountEnable)
+    if (true)//(revCountEnable)
     {
         revolutions++;
     }
-    revCountEnable = 0;    
+    //revCountEnable = 0;    
 }
 
 void TACOPULSEPERIOD()
 {
     tacoPulseDuration = pulseTimer.elapsed_time();    
-    tacoBounce.attach(&ENABLEREVCOUNT, (tacoPulseDuration-2ms));    
+    //tacoBounce.attach(&ENABLEREVCOUNT, (tacoPulseDuration-2ms));    
 }
 
 void ENABLETACO() // define function called in BUTTONINTERRUPT
 {
     taco.rise(&TACOINTERRUPT);
-    taco.fall(&TACOPULSEPERIOD);
+    //taco.fall(&TACOPULSEPERIOD);
     pulseTimer.reset();
     pulseTimer.start();
 }
@@ -91,15 +92,16 @@ void ENABLEPWM()
 void PINSTATUSHIGH()
 {
     core_util_critical_section_enter();
-    PWMpin = 1;
+    //PWMpin = 1;
     core_util_critical_section_exit();
 }
 
 void PINSTATUSLOW()
 {
     core_util_critical_section_enter();
-    PWMpin = 0;
-    core_util_critical_section_exit();}
+    //PWMpin = 0;
+    core_util_critical_section_exit();
+}
 
 //---------------------------------------Subroutines---------------------------------------
 
