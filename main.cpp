@@ -7,6 +7,7 @@
 #include "EnumDef.h"
 #include "RotaryEncoder.h"
 #include "TemperatureSensor.h"
+#include "TextLCD.h"
 
 #define REFRESH_RATE     100ms
 #define LED2 PC_0
@@ -14,6 +15,7 @@
 BusOut leds(LED1,LED2);
 mRotaryEncoder REnc(PA_1, PA_4, PC_1, PullUp, 1500);
 TemperatureSensor TempSense(24);
+TextLCD lcd(PB_15, PB_14, PB_10, PA_8, PB_2, PB_1);
 bool enc_rotated = false;      // rotary encoder was rotated left or right
 int pulseCount;
 
@@ -49,6 +51,7 @@ int main()
     {
         ThisThread::sleep_for(REFRESH_RATE);
         leds.write(getMode() + 1);   
+        lcd.printf("HA GAAAAY\n");
 
         if (getMode() == CLOSEDLOOP)
         {
