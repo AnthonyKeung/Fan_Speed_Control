@@ -35,6 +35,7 @@ int main()
     leds.write(0x0);
     enable_Button();
     REnc.attachROT(&trigger_rotated);
+    lcd.printf("Hello peeps\n");
 
     if (TempSense.checkSensorConnected())
     {
@@ -51,7 +52,6 @@ int main()
     {
         ThisThread::sleep_for(REFRESH_RATE);
         leds.write(getMode() + 1);   
-        lcd.printf("HA GAAAAY\n");
 
         if (getMode() == CLOSEDLOOP)
         {
