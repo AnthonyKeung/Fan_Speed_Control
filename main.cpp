@@ -35,7 +35,6 @@ int main()
     leds.write(0x0);
     enable_Button();
     REnc.attachROT(&trigger_rotated);
-    lcd.printf("Hello peeps\n");
 
     if (TempSense.checkSensorConnected())
     {
@@ -56,6 +55,10 @@ int main()
         if (getMode() == CLOSEDLOOP)
         {
             TempSense.read();
+            lcd.cls();
+            lcd.printf("T = %d ", TempSense.getTemperatureReading());
+            lcd.locate(0, 1);
+            lcd.printf("S=367");
             fprintf(mypcFile1,"The current Temperature is %d \n" ,TempSense.getTemperatureReading());
         }
         // shaft has been rotated?
@@ -63,7 +66,7 @@ int main()
         {
             enc_rotated = false;
             pulseCount = REnc.Get();
-            printf ("Pulses is: %i\n\r", pulseCount);
+            fprintf (mypcFile1,"Pulses is: %i\n\r", pulseCount);
         }           
     }
 }
