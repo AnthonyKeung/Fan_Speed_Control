@@ -27,6 +27,7 @@ int main()
     leds.write(0x0);
     enable_Button();
     enableRotaryEncoder();
+    setPeriodms(20);
 
     if (TempSense.checkSensorConnected())
     {
