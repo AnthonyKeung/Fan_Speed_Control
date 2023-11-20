@@ -7,6 +7,7 @@
 #include "EnumDef.h"
 #include "RotaryEncoder.h"
 #include "TemperatureSensor.h"
+#include "FanControl.h"
 
 #define REFRESH_RATE     100ms
 #define LED2 PC_0
@@ -47,6 +48,10 @@ int main()
         {
             TempSense.read();
             fprintf(mypcFile1,"The current Temperature is %d \n" ,TempSense.getTemperatureReading());
+        }
+        else if (getMode() == OPENLOOP)
+        {
+            setFan(float(getPulseCount()) /100);
         }
 
         // shaft has been rotated?
