@@ -8,8 +8,9 @@
 #include "RotaryEncoder.h"
 #include "TemperatureSensor.h"
 #include "FanControl.h"
+#include "Tachometer.h"
 
-#define REFRESH_RATE     100ms
+#define REFRESH_RATE     1000ms
 #define LED2 PC_0
  
 BusOut leds(LED1,LED2);
@@ -27,6 +28,7 @@ int main()
     leds.write(0x0);
     enable_Button();
     enableRotaryEncoder();
+    ENABLETACO();
     setPeriodms(5);
 
     if (TempSense.checkSensorConnected())
@@ -53,6 +55,8 @@ int main()
         else if (getMode() == OPENLOOP)
         {
             setFan(float(getPulseCount()) /100);
+            printf ("Revs: %i\n\r" , getRevs(false));
+            printf ("RPM:  %i\n\r" , getRPM(true));
         }
 
         // shaft has been rotated?
