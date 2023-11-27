@@ -2,6 +2,7 @@
 
 #include "Interrupts.h"
 #include "EnumDef.h"
+#include "RotaryEncoder.h"
 
 #define DEBOUNCE_TIMER     100ms
 
@@ -9,6 +10,9 @@ Mode mode = CLOSEDLOOP;
 
 InterruptIn button(BUTTON1);
 Timeout debounce_Button;
+
+mRotaryEncoder REnc(PA_1, PA_4, PC_1, PullUp, 1500);
+bool encRotated = false;      // rotary encoder was rotated left or right
 
 //---------------------------------------BUTTON INTERRUPTS---------------------------------------
 
@@ -26,9 +30,41 @@ void enable_Button() // define function called in BUTTONINTERRUPT
     button.rise(&BUTTONINTERRUPT);
     debounce_Button.detach();
 }
+//---------------------------------------ROTARY ENCODER INTERRUPTS---------------------------------------
 
+void ROTENCINTERRUPT()
+{
+    encRotated = true;               // just set the flag, rest is done outside isr
+}
+
+void enableRotaryEncoder() // define function called in BUTTONINTERRUPT
+{
+    REnc.attachROT(&ROTENCINTERRUPT);
+}
 //---------------------------------------GETTERS---------------------------------------
 
+bool getRotEncRotated()
+{
+    return encRotated;
+}
+
+void setRotEncRotated(bool newVal)
+{
+    encRotated = newVal;
+}
+
+int getPulseCount()
+{
+    if (REnc.Get() > 100)
+    {
+        REnc.Set(100);
+    }
+    else if (REnc.Get() < 0) {
+    REnc.Set(0);
+    }
+    
+    return REnc.Get();
+}
 
 int getMode()
 {

@@ -7,32 +7,29 @@
 #include "EnumDef.h"
 #include "RotaryEncoder.h"
 #include "TemperatureSensor.h"
+#include "FanControl.h"
+#include "Tachometer.h"
 
-#define REFRESH_RATE     100ms
+#define REFRESH_RATE     1000ms
 #define LED2 PC_0
  
 BusOut leds(LED1,LED2);
-mRotaryEncoder REnc(PA_1, PA_4, PC_1, PullUp, 1500);
 TemperatureSensor TempSense(24);
-bool enc_rotated = false;      // rotary encoder was rotated left or right
 int pulseCount;
 
 //Printing setup 
 BufferedSerial mypc(USBTX, USBRX);
 FILE* mypcFile1 = fdopen(&mypc, "r+");
 
-//interrup-Handler for rotary-encoder rotation
-void trigger_rotated() 
-{
-    enc_rotated = true;               // just set the flag, rest is done outside isr
-}
 
 
 int main()
 {
     leds.write(0x0);
     enable_Button();
-    REnc.attachROT(&trigger_rotated);
+    enableRotaryEncoder();
+    ENABLETACO();
+    setPeriodms(5);
 
     if (TempSense.checkSensorConnected())
     {
@@ -55,12 +52,18 @@ int main()
             TempSense.read();
             fprintf(mypcFile1,"The current Temperature is %d \n" ,TempSense.getTemperatureReading());
         }
-        // shaft has been rotated?
-        if (enc_rotated) 
+        else if (getMode() == OPENLOOP)
         {
-            enc_rotated = false;
-            pulseCount = REnc.Get();
-            printf ("Pulses is: %i\n\r", pulseCount);
+            setFan(float(getPulseCount()) /100);
+            printf ("Revs: %i\n\r" , getRevs(false));
+            printf ("RPM:  %i\n\r" , getRPM(true));
+        }
+
+        // shaft has been rotated?
+        if (getRotEncRotated()) 
+        {
+            setRotEncRotated(false);
+            printf ("Pulses is: %i\n\r", getPulseCount());
         }           
     }
 }
