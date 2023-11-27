@@ -41,7 +41,7 @@ int main()
     }
     else
     {
-        fprintf(mypcFile1, "The sensor is succesfully connected \n");
+        fprintf(mypcFile1, "The sensor is not succesfully connected \n");
         wait_us(1000000);
     }
 
@@ -56,7 +56,7 @@ int main()
             lcd.cls();
             lcd.printf("T = %d ", TempSense.getTemperatureReading());
             lcd.locate(0, 1);
-            lcd.printf("S=367");
+            lcd.printf("S= %d", getRPM(true));
             fprintf(mypcFile1,"The current Temperature is %d \n" ,TempSense.getTemperatureReading());
         }
         else if (getMode() == OPENLOOP)
