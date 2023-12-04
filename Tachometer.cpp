@@ -30,7 +30,7 @@ int getRevs(bool reset = true)
 
 int getRPM(bool reset = true)
 {
-    float elapsedTime =  (float(1000000) / 2 * 60) / static_cast<float>(timer.elapsed_time().count()) ; //2 ticks per rev, 1000000 / 4, * 60 secs
+    float elapsedTime =  (float(1000000) / 4 * 60) / static_cast<float>(timer.elapsed_time().count()) ; //2 ticks per rev, 1000000 / 4, * 60 secs
     //float elapsedTime = (1/static_cast<float>(timer.elapsed_time().count())) * 60 / 2 / 1000000 ; //60 secs, 2 ticks a rev, 1000000 us per s (value is inverse of elapsed time)
     int RPM = int(float(revolutions) * elapsedTime); // 
     if (reset)
