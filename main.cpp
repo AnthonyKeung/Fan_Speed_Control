@@ -8,8 +8,9 @@
 #include "RotaryEncoder.h"
 #include "TemperatureSensor.h"
 #include "FanControl.h"
-#include "Tachometer.h"
+//#include "Tachometer.h"
 #include "TextLCD.h"
+#include "tach.h"
 
 #define REFRESH_RATE     1000ms
 #define LED2 PC_0
@@ -19,6 +20,7 @@ TemperatureSensor TempSense(24);
 TextLCD lcd(PB_15, PB_14, PB_10, PA_8, PB_2, PB_1);
 bool enc_rotated = false;      // rotary encoder was rotated left or right
 int pulseCount;
+Tach tacho(PA_0,2);
 
 //Printing setup 
 BufferedSerial mypc(USBTX, USBRX);
@@ -31,7 +33,7 @@ int main()
     leds.write(0x0);
     enable_Button();
     enableRotaryEncoder();
-    ENABLETACO();
+    //ENABLETACO();
     setPeriodms(5);
 
     if (TempSense.checkSensorConnected())
@@ -56,14 +58,14 @@ int main()
             lcd.cls();
             lcd.printf("T = %d ", TempSense.getTemperatureReading());
             lcd.locate(0, 1);
-            lcd.printf("S= %d", getRPM(true));
+            lcd.printf("S= %d", tacho.getCount());
             fprintf(mypcFile1,"The current Temperature is %d \n" ,TempSense.getTemperatureReading());
         }
         else if (getMode() == OPENLOOP)
         {
             setFan(float(getPulseCount()) /100);
-            printf ("Revs: %i\n\r" , getRevs(false));
-            printf ("RPM:  %i\n\r" , getRPM(true));
+            printf ("Revs: %i\n\r" , tacho.getCount());
+            printf ("RPM:  %i\n\r" , tacho.getSpeed());
         }
 
         // shaft has been rotated?

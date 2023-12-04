@@ -4,7 +4,8 @@
 Timer timer;
 
 int revolutions = 0;
-InterruptIn taco(PA_0);
+//InterruptIn taco(PA_0);
+InterruptIn taco(PB_4);
 
 void TACOINTERRUPT()
 {
