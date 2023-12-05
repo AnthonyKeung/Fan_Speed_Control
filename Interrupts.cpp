@@ -55,15 +55,15 @@ void setRotEncRotated(bool newVal)
 
 int getPulseCount()
 {
-    if (REnc.Get() > 100)
+    if (REnc.Get() > 200)
     {
-        REnc.Set(100);
+        REnc.Set(200);
     }
     else if (REnc.Get() < 0) {
     REnc.Set(0);
     }
     
-    return REnc.Get();
+    return (REnc.Get() / 2);
 }
 
 int getMode()

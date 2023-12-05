@@ -20,6 +20,7 @@ TemperatureSensor TempSense(24);
 TextLCD lcd(PB_15, PB_14, PB_10, PA_8, PB_2, PB_1);
 bool enc_rotated = false;      // rotary encoder was rotated left or right
 int pulseCount;
+int RPMcutoff;
 Tach tacho(PA_0,4);
 
 //Printing setup 
@@ -54,15 +55,26 @@ int main()
         ThisThread::sleep_for(REFRESH_RATE);
         leds.write(getMode() + 1);
 
-        tempRPM = tacho.getSpeed() * 60;
+        // if (getPulseCount() < 20)
+        //     RPMcutoff = 1000;
+        // else if (getPulseCount() < 30)
+        //     RPMcutoff = 1300;
+        // else if (getPulseCount() < 40)
+        //     RPMcutoff = 1600;
+        // else if (getPulseCount() < 50)
+        //     RPMcutoff = 1800;
+        // else  
+        //     RPMcutoff = 2100;
 
-        while (tempRPM > 2100)
+        RPMcutoff = 40 * getPulseCount();
+
+        tempRPM = tacho.getSpeed() * 60;
+        while (tempRPM > RPMcutoff)
         {
             tempRPM = tempRPM / 2;
         }
 
         RPM = RPM * 0.95 + tempRPM * 0.05;
-
 
         if (getMode() == CLOSEDLOOP)
         {
