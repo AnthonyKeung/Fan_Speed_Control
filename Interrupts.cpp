@@ -12,6 +12,7 @@ InterruptIn button(BUTTON1);
 Timeout debounce_Button;
 
 mRotaryEncoder REnc(PA_1, PA_4, PC_1, PullUp, 1500);
+
 bool encRotated = false;      // rotary encoder was rotated left or right
 
 //---------------------------------------BUTTON INTERRUPTS---------------------------------------
@@ -40,6 +41,7 @@ void ROTENCINTERRUPT()
 void enableRotaryEncoder() // define function called in BUTTONINTERRUPT
 {
     REnc.attachROT(&ROTENCINTERRUPT);
+    REnc.Set(100);
 }
 //---------------------------------------GETTERS---------------------------------------
 

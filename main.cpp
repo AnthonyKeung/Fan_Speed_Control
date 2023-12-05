@@ -11,9 +11,8 @@
 #include "TextLCD.h"
 #include "tach.h"
 
-#define REFRESH_RATE     100ms
+#define REFRESH_RATE     200ms
 #define LED2 PC_0
- 
 BusOut leds(LED1,LED2);
 TemperatureSensor TempSense(24);
 TextLCD lcd(PB_15, PB_14, PB_10, PA_8, PB_2, PB_1);
@@ -26,14 +25,11 @@ Tach tacho(PA_0,4);
 BufferedSerial mypc(USBTX, USBRX);
 FILE* mypcFile1 = fdopen(&mypc, "r+");
 
-
-
 int main()
 {
     leds.write(0x0);
     enable_Button();
     enableRotaryEncoder();
-    //ENABLETACO();
     setPeriodms(5);
 
     if (TempSense.checkSensorConnected())
@@ -49,31 +45,33 @@ int main()
 
     int RPM = 0;
     int tempRPM = 0;
+    int calibratedRPM =0;
+    
     while (true) 
     {
         ThisThread::sleep_for(REFRESH_RATE);
         leds.write(getMode() + 1);
 
-        // if (getPulseCount() < 20)
-        //     RPMcutoff = 1000;
-        // else if (getPulseCount() < 30)
-        //     RPMcutoff = 1300;
-        // else if (getPulseCount() < 40)
-        //     RPMcutoff = 1600;
-        // else if (getPulseCount() < 50)
-        //     RPMcutoff = 1800;
-        // else  
-        //     RPMcutoff = 2100;
-
+        //Removal of high frequency taco pulses
         RPMcutoff = 40 * getPulseCount();
-
         tempRPM = tacho.getSpeed() * 60;
         while (tempRPM > RPMcutoff)
         {
             tempRPM = tempRPM / 2;
         }
 
-        RPM = RPM * 0.95 + tempRPM * 0.05;
+        
+        RPM = RPM * 0.75 + tempRPM * 0.25; //decaying lpf for averaging rpm values
+
+        //scaling for inaccuracies below 1500RPM
+        if (RPM < 1500)
+        {
+            calibratedRPM = ((1-(float(RPM)/1500)) * 0.35 + 1) * RPM;
+        }
+        else 
+        {
+            calibratedRPM = RPM;
+        }
 
         if (getMode() == CLOSEDLOOP)
         {
@@ -87,8 +85,7 @@ int main()
         else if (getMode() == OPENLOOP)
         {
             setFan(float(getPulseCount()) /100);
-            //printf ("Revs: %i\n\r" , tacho.getCount());
-            printf ("RPM:  %i\n\r" , RPM);
+            printf ("RPM:  %i\n\r" , calibratedRPM);
         }
 
         // shaft has been rotated?
