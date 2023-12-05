@@ -8,7 +8,6 @@
 #include "RotaryEncoder.h"
 #include "TemperatureSensor.h"
 #include "FanControl.h"
-//#include "Tachometer.h"
 #include "TextLCD.h"
 #include "tach.h"
 
