@@ -1,5 +1,6 @@
 #include "mbed.h"
 #include <chrono>
+#include <cmath>
 #include <cstdint>
 #include <type_traits>
 
@@ -11,14 +12,19 @@
 #include "TextLCD.h"
 #include "tach.h"
 
-#define REFRESH_RATE     200ms
+#define REFRESH_RATE     50ms
 #define LED2 PC_0
+#define BUF_SIZE    40
+
 BusOut leds(LED1,LED2);
 TemperatureSensor TempSense(24);
 TextLCD lcd(PB_15, PB_14, PB_10, PA_8, PB_2, PB_1);
 bool enc_rotated = false;      // rotary encoder was rotated left or right
 int pulseCount;
 int RPMcutoff;
+int arrayRPM[BUF_SIZE] = {0,0,0,0,0};
+int arrayStart = 0;
+int sum = 0;
 Tach tacho(PA_0,4);
 
 //Printing setup 
@@ -45,7 +51,7 @@ int main()
 
     int RPM = 0;
     int tempRPM = 0;
-    int calibratedRPM =0;
+    int calibratedRPM = 0;
     
     while (true) 
     {
@@ -59,19 +65,17 @@ int main()
         {
             tempRPM = tempRPM / 2;
         }
-
-        
-        RPM = RPM * 0.75 + tempRPM * 0.25; //decaying lpf for averaging rpm values
-
-        //scaling for inaccuracies below 1500RPM
-        if (RPM < 1500)
+        if (tempRPM < 800)
         {
-            calibratedRPM = ((1-(float(RPM)/1500)) * 0.35 + 1) * RPM;
+            tempRPM = ((1-(float(tempRPM)/800)) * 0.35 + 1) * tempRPM;
         }
-        else 
+        arrayRPM[arrayStart] = tempRPM;
+        sum = 0;
+        for (int i=0; i<BUF_SIZE; i++)
         {
-            calibratedRPM = RPM;
+            sum += arrayRPM[i];
         }
+        RPM = sum / BUF_SIZE;        
 
         if (getMode() == CLOSEDLOOP)
         {
@@ -85,7 +89,7 @@ int main()
         else if (getMode() == OPENLOOP)
         {
             setFan(float(getPulseCount()) /100);
-            printf ("RPM:  %i\n\r" , calibratedRPM);
+            printf ("RPM:  %i\n\r" , RPM);
         }
 
         // shaft has been rotated?
@@ -93,6 +97,9 @@ int main()
         {
             setRotEncRotated(false);
             printf ("Pulses is: %i\n\r", getPulseCount());
-        }           
+        }     
+
+        arrayStart++;
+        arrayStart = arrayStart % BUF_SIZE;      
     }
 }
