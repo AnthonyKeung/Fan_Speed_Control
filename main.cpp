@@ -65,10 +65,7 @@ int main()
         {
             tempRPM = tempRPM / 2;
         }
-        // if (tempRPM < 800)
-        // {
-        //     tempRPM = ((1-(float(tempRPM)/800)) * 0.35 + 1) * tempRPM;
-        // }
+        //linearization algorithm
         tempRPM = tempRPM^2 / 2050;
 
         arrayRPM[arrayStart] = tempRPM;
