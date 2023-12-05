@@ -65,10 +65,12 @@ int main()
         {
             tempRPM = tempRPM / 2;
         }
-        if (tempRPM < 800)
-        {
-            tempRPM = ((1-(float(tempRPM)/800)) * 0.35 + 1) * tempRPM;
-        }
+        // if (tempRPM < 800)
+        // {
+        //     tempRPM = ((1-(float(tempRPM)/800)) * 0.35 + 1) * tempRPM;
+        // }
+        tempRPM = tempRPM^2 / 2050;
+
         arrayRPM[arrayStart] = tempRPM;
         sum = 0;
         for (int i=0; i<BUF_SIZE; i++)
