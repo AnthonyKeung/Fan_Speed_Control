@@ -12,7 +12,7 @@
 #include "TextLCD.h"
 #include "tach.h"
 
-#define REFRESH_RATE     1000ms
+#define REFRESH_RATE     100ms
 #define LED2 PC_0
  
 BusOut leds(LED1,LED2);
@@ -20,7 +20,7 @@ TemperatureSensor TempSense(24);
 TextLCD lcd(PB_15, PB_14, PB_10, PA_8, PB_2, PB_1);
 bool enc_rotated = false;      // rotary encoder was rotated left or right
 int pulseCount;
-Tach tacho(PA_0,2);
+Tach tacho(PA_0,4);
 
 //Printing setup 
 BufferedSerial mypc(USBTX, USBRX);
@@ -47,10 +47,22 @@ int main()
         wait_us(1000000);
     }
 
+    int RPM = 0;
+    int tempRPM = 0;
     while (true) 
     {
         ThisThread::sleep_for(REFRESH_RATE);
-        leds.write(getMode() + 1);   
+        leds.write(getMode() + 1);
+
+        tempRPM = tacho.getSpeed() * 60;
+
+        while (tempRPM > 2100)
+        {
+            tempRPM = tempRPM / 2;
+        }
+
+        RPM = RPM * 0.95 + tempRPM * 0.05;
+
 
         if (getMode() == CLOSEDLOOP)
         {
@@ -64,8 +76,8 @@ int main()
         else if (getMode() == OPENLOOP)
         {
             setFan(float(getPulseCount()) /100);
-            printf ("Revs: %i\n\r" , tacho.getCount());
-            printf ("RPM:  %i\n\r" , tacho.getSpeed());
+            //printf ("Revs: %i\n\r" , tacho.getCount());
+            printf ("RPM:  %i\n\r" , RPM);
         }
 
         // shaft has been rotated?
