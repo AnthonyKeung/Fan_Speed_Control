@@ -10,22 +10,15 @@
 #include "TemperatureSensor.h"
 #include "FanControl.h"
 #include "TextLCD.h"
-#include "tach.h"
-
+#include "TacoProcessing.h"
 #define REFRESH_RATE     50ms
 #define LED2 PC_0
-#define BUF_SIZE    40
 
 BusOut leds(LED1,LED2);
 TemperatureSensor TempSense(24);
 TextLCD lcd(PB_15, PB_14, PB_10, PA_8, PB_2, PB_1);
 bool enc_rotated = false;      // rotary encoder was rotated left or right
 int pulseCount;
-int RPMcutoff;
-int arrayRPM[BUF_SIZE] = {0,0,0,0,0};
-int arrayStart = 0;
-int sum = 0;
-Tach tacho(PA_0,4);
 
 //Printing setup 
 BufferedSerial mypc(USBTX, USBRX);
@@ -49,32 +42,11 @@ int main()
         wait_us(1000000);
     }
 
-    int RPM = 0;
-    int tempRPM = 0;
-    int calibratedRPM = 0;
     
     while (true) 
     {
         ThisThread::sleep_for(REFRESH_RATE);
-        leds.write(getMode() + 1);
-
-        //Removal of high frequency taco pulses
-        RPMcutoff = 40 * getPulseCount();
-        tempRPM = tacho.getSpeed() * 60;
-        while (tempRPM > RPMcutoff)
-        {
-            tempRPM = tempRPM / 2;
-        }
-        //linearization algorithm
-        tempRPM = tempRPM^2 / 2050;
-
-        arrayRPM[arrayStart] = tempRPM;
-        sum = 0;
-        for (int i=0; i<BUF_SIZE; i++)
-        {
-            sum += arrayRPM[i];
-        }
-        RPM = sum / BUF_SIZE;        
+        leds.write(getMode() + 1);  
 
         if (getMode() == CLOSEDLOOP)
         {
@@ -82,13 +54,13 @@ int main()
             lcd.cls();
             lcd.printf("T = %d ", TempSense.getTemperatureReading());
             lcd.locate(0, 1);
-            lcd.printf("S= %d", tacho.getCount());
+            lcd.printf("S= %d", RPMcalculate());
             fprintf(mypcFile1,"The current Temperature is %d \n" ,TempSense.getTemperatureReading());
         }
         else if (getMode() == OPENLOOP)
         {
             setFan(float(getPulseCount()) /100);
-            printf ("RPM:  %i\n\r" , RPM);
+            printf ("RPM:  %i\n\r" , RPMcalculate());
         }
 
         // shaft has been rotated?
@@ -96,9 +68,13 @@ int main()
         {
             setRotEncRotated(false);
             printf ("Pulses is: %i\n\r", getPulseCount());
-        }     
+        } 
 
-        arrayStart++;
-        arrayStart = arrayStart % BUF_SIZE;      
+        if (getf()) ////USE TO TEST WHETHER IT IS STILL ROTATING
+        {
+            printf ("falling");
+            setf();
+        }
+    
     }
 }

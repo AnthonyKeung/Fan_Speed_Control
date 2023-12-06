@@ -1,4 +1,5 @@
  #include "tach.h"
+#include <cstdio>
  
  //64 counts per rev
  
@@ -8,7 +9,7 @@
     pulsesPerRev_ = pulsesPerRev;
     input_.mode(PullUp);
     input_.rise(callback(this, &Tach::update));
-    //input_.fall(this, &Tach::update); callback(&Tach, &Tach::update)
+    input_.fall(callback(this, &Tach::falling)); //callback(&Tach, &Tach::update)
     timer_.start();
     for(int i=0;i<NSAMP;i++){
         speedBuffer_[i]=0.0;
@@ -35,4 +36,17 @@ void Tach::update(void) {
     speedBuffer_[i%NSAMP]=speed;
     i++;
     timer_.reset();
+}
+
+void Tach::falling() {
+    fallb = true;
+}
+
+void Tach::resetfall() {
+    fallb = false;
+}
+
+bool Tach::getfall()
+{   
+    return fallb;
 }

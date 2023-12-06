@@ -44,6 +44,10 @@ public:
      */
     float getSpeed(void);
     int getCount(void);
+    bool getfall();
+    void resetfall();
+
+    bool         fallb = false;
    
 private:
 
@@ -55,6 +59,8 @@ private:
      * update current speed estimate
      */
     void update(void);
+
+    void falling();
 
     /**
      * Called on every rising edge of channel index to update revolution
