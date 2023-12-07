@@ -3,7 +3,7 @@
 #include "Interrupts.h"
 #include <cstdio>
 
-#define TEMP_RPM_BUF_SIZE    40
+#define TEMP_RPM_BUF_SIZE    20
 #define RPM_BUF_SIZE    10
 #define FALL_TEMP_RPM_BUF_SIZE    10
 
@@ -44,7 +44,7 @@ int RPMcalculate()
     //Removal of high frequency taco pulses
     // RPMcutoff = 40 * getPulseCount();
     // RPMcutoff = 900 * log_a_to_base_b(getPulseCount(), 5);
-    RPMcutoff = 2500 * sqrt(float(getPulseCount())/100-0.035);
+    RPMcutoff = 2500 * sqrt(getPulseCount()/100-0.035);
     if (spinning)
     {        
         tempRPM = tacho.getSpeed() * 60;    

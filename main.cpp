@@ -71,7 +71,14 @@ int main()
         }
         else if (getMode() == OPENLOOP)
         {
-            setFan(float(getPulseCount()) /100);
+            setFan(getPulseCount() /100);
+            printf ("RPM:  %i\n\r" , RPMcalculate());
+            lcd.cls();
+            lcd.printf("S= %d", RPMread());
+        }
+        else if (getMode() == SLOWCONTROL)
+        {
+            setFan(getPulseCount() /100);
             printf ("RPM:  %i\n\r" , RPMcalculate());
             lcd.cls();
             lcd.printf("S= %d", RPMread());
@@ -81,7 +88,7 @@ int main()
         if (getRotEncRotated()) 
         {
             setRotEncRotated(false);
-            printf ("Pulses is: %i\n\r", getPulseCount());
+            printf ("Pulses is: %.2f\n\r", getPulseCount());
         } 
     
     }
