@@ -1,6 +1,7 @@
 #include "TacoProcessing.h"
 #include "Tach.h"
 #include "Interrupts.h"
+#include <cstdio>
 
 #define TEMP_RPM_BUF_SIZE    40
 #define RPM_BUF_SIZE    10
@@ -22,9 +23,11 @@ int RPMread()
     return RPM;
 }
 
+
 int RPMcalculate()
 {
     arrayFall[arrayFallHead] = getf();
+    setf();
     arrayFallHead++;
     arrayFallHead = arrayFallHead % FALL_TEMP_RPM_BUF_SIZE;
 
@@ -39,16 +42,18 @@ int RPMcalculate()
     
 
     //Removal of high frequency taco pulses
-    RPMcutoff = 40 * getPulseCount();
+    // RPMcutoff = 40 * getPulseCount();
+    // RPMcutoff = 900 * log_a_to_base_b(getPulseCount(), 5);
+    RPMcutoff = 2500 * sqrt(float(getPulseCount())/100-0.035);
     if (spinning)
-    {
+    {        
         tempRPM = tacho.getSpeed() * 60;    
         while (tempRPM > RPMcutoff)
         {
             tempRPM = tempRPM / 2;
         }
-        //linearization algorithm
-        tempRPM = tempRPM^2 / 2050;
+        // linearization algorithm
+        // tempRPM = tempRPM^2 / 2050;
     }
     else
     {
@@ -58,25 +63,25 @@ int RPMcalculate()
     arrayTempRPM[arrayTempRPMHead] = tempRPM;
     
     sum = 0;
-    bool varying = false;    
+    // bool varying = false;    
     for (int j=0; j<TEMP_RPM_BUF_SIZE; j++)
     {
         sum += arrayTempRPM[j];
-        if ((arrayTempRPM[j] != arrayTempRPM[j-1]) and j!=0)
-        {
-            varying = true;
-        }
+        // if ((arrayTempRPM[j] != arrayTempRPM[j-1]) and j!=0)
+        // {
+        //     varying = true;
+        // }
     }
 
-    if (!varying)
-    {
-        arrayTempRPM[arrayTempRPMHead] = 0;
-        sum = 0;
-        for (int j=0; j<TEMP_RPM_BUF_SIZE; j++)
-        {
-            sum += arrayTempRPM[j];
-        }
-    }
+    // if (!varying)
+    // {
+    //     arrayTempRPM[arrayTempRPMHead] = 0;
+    //     sum = 0;
+    //     for (int j=0; j<TEMP_RPM_BUF_SIZE; j++)
+    //     {
+    //         sum += arrayTempRPM[j];
+    //     }
+    // }
 
     RPM = sum / TEMP_RPM_BUF_SIZE; 
 

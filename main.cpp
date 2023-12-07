@@ -69,7 +69,6 @@ int main()
             setRotEncRotated(false);
             printf ("Pulses is: %i\n\r", getPulseCount());
         } 
-
     
     }
 }
