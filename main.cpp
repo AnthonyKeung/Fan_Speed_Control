@@ -10,13 +10,25 @@
 #include "TemperatureSensor.h"
 #include "FanControl.h"
 #include "TextLCD.h"
+<<<<<<< HEAD
+#include "PID.h"
 #include "TacoProcessing.h"
 #define REFRESH_RATE     50ms
 #define LED2 PC_0
 
+#define PIDRATE 0.1 
+=======
+#include "PID.h"
+
+#define REFRESH_RATE     1000ms
+#define LED2 PC_0
+
+#define PIDRATE 0.1 
+>>>>>>> origin/PID_Control
 BusOut leds(LED1,LED2);
 TemperatureSensor TempSense(24);
 TextLCD lcd(PB_15, PB_14, PB_10, PA_8, PB_2, PB_1);
+PID controller(10, 0, 0, PIDRATE);
 bool enc_rotated = false;      // rotary encoder was rotated left or right
 int pulseCount;
 
@@ -31,36 +43,65 @@ int main()
     enableRotaryEncoder();
     setPeriodms(5);
 
-    if (TempSense.checkSensorConnected())
-    {
-        fprintf(mypcFile1, "The sensor is succesfully connected \n");
-        wait_us(1000000);
-    }
-    else
-    {
-        fprintf(mypcFile1, "The sensor is not succesfully connected \n");
-        wait_us(1000000);
-    }
+    //Analog input from 0.0 to 3.3V
+    controller.setInputLimits(0, 40);
+    //Pwm output from 0.0 to 1.0
+    controller.setOutputLimits(-1, 0);
+    //If there's a bias.
+    controller.setBias(0.3);
+    controller.setMode(1);
+
+    TempSense.checkSensorConnected();
 
     
     while (true) 
     {
         ThisThread::sleep_for(REFRESH_RATE);
+<<<<<<< HEAD
         leds.write(getMode() + 1);  
+        TempSense.read();
+=======
+        leds.write(getMode() + 1);
+        int revs =  getRevs(false);
+        int RPM = getRPM(true);
+        TempSense.read();
+>>>>>>> origin/PID_Control
 
         if (getMode() == CLOSEDLOOP)
         {
-            TempSense.read();
+            //PID Calculations
+            controller.setSetPoint(22);
+            controller.setProcessValue(TempSense.getTemperatureReading());
+            setFan(-1*controller.compute());
+
+            //Display the values 
             lcd.cls();
             lcd.printf("T = %d ", TempSense.getTemperatureReading());
             lcd.locate(0, 1);
+<<<<<<< HEAD
             lcd.printf("S= %d", RPMcalculate());
+            printf("PWM value %f" , -1*controller.compute());
+=======
+            lcd.printf("S= %d", RPM);
+            printf("PWM value %f" , -1*controller.compute());
+>>>>>>> origin/PID_Control
             fprintf(mypcFile1,"The current Temperature is %d \n" ,TempSense.getTemperatureReading());
         }
         else if (getMode() == OPENLOOP)
         {
             setFan(float(getPulseCount()) /100);
+<<<<<<< HEAD
             printf ("RPM:  %i\n\r" , RPMcalculate());
+            lcd.cls();
+            lcd.printf("S= %d", RPMread());
+=======
+            lcd.cls();
+            lcd.printf("S= %d", RPM );
+            lcd.locate(0, 1);
+            lcd.printf("P= %d", revs);
+            printf ("Revs: %i\n\r" , revs);
+            printf ("RPM:  %i\n\r" , RPM);
+>>>>>>> origin/PID_Control
         }
 
         // shaft has been rotated?
