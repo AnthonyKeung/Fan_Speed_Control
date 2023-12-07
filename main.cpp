@@ -70,11 +70,6 @@ int main()
             printf ("Pulses is: %i\n\r", getPulseCount());
         } 
 
-        if (getf()) ////USE TO TEST WHETHER IT IS STILL ROTATING
-        {
-            printf ("falling");
-            setf();
-        }
     
     }
 }
