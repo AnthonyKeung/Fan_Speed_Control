@@ -2,14 +2,16 @@
 #include "Tach.h"
 #include "Interrupts.h"
 
-#define BUF_SIZE    40
-#define FALL_BUF_SIZE    10
+#define TEMP_RPM_BUF_SIZE    40
+#define RPM_BUF_SIZE    10
+#define FALL_TEMP_RPM_BUF_SIZE    10
 
 Tach tacho(PA_0,4);
 int RPMcutoff;
-int arrayRPM[BUF_SIZE] = {0};
-bool arrayFall[FALL_BUF_SIZE] = {0};
-int arrayRPMHead = 0;
+int arrayTempRPM[TEMP_RPM_BUF_SIZE] = {0};
+int arrayRPM[RPM_BUF_SIZE] = {0};
+bool arrayFall[FALL_TEMP_RPM_BUF_SIZE] = {0};
+int arrayTempRPMHead = 0;
 int arrayFallHead = 0;
 int sum = 0;
 int RPM = 0;
@@ -24,10 +26,10 @@ int RPMcalculate()
 {
     arrayFall[arrayFallHead] = getf();
     arrayFallHead++;
-    arrayFallHead = arrayFallHead % FALL_BUF_SIZE;
+    arrayFallHead = arrayFallHead % FALL_TEMP_RPM_BUF_SIZE;
 
     bool spinning = false;
-    for (int i=0; i<FALL_BUF_SIZE; i++)
+    for (int i=0; i<FALL_TEMP_RPM_BUF_SIZE; i++)
     {
         if (arrayFall[i] == true)
         {
@@ -53,17 +55,33 @@ int RPMcalculate()
         tempRPM = 0;
     }
 
-
-    arrayRPM[arrayRPMHead] = tempRPM;
+    arrayTempRPM[arrayTempRPMHead] = tempRPM;
+    
     sum = 0;
-    for (int j=0; j<BUF_SIZE; j++)
+    bool varying = false;    
+    for (int j=0; j<TEMP_RPM_BUF_SIZE; j++)
     {
-        sum += arrayRPM[j];
+        sum += arrayTempRPM[j];
+        if ((arrayTempRPM[j] != arrayTempRPM[j-1]) and j!=0)
+        {
+            varying = true;
+        }
     }
-    RPM = sum / BUF_SIZE; 
 
-    arrayRPMHead++;
-    arrayRPMHead = arrayRPMHead % BUF_SIZE;
+    if (!varying)
+    {
+        arrayTempRPM[arrayTempRPMHead] = 0;
+        sum = 0;
+        for (int j=0; j<TEMP_RPM_BUF_SIZE; j++)
+        {
+            sum += arrayTempRPM[j];
+        }
+    }
+
+    RPM = sum / TEMP_RPM_BUF_SIZE; 
+
+    arrayTempRPMHead++;
+    arrayTempRPMHead = arrayTempRPMHead % TEMP_RPM_BUF_SIZE;
     return RPM;
 }
 
