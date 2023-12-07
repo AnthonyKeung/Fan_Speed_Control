@@ -3,8 +3,8 @@
 #include "Interrupts.h"
 #include <cstdio>
 
-#define TEMP_RPM_BUF_SIZE    40
-#define RPM_BUF_SIZE    10
+#define TEMP_RPM_BUF_SIZE    10
+#define RPM_BUF_SIZE    5
 #define FALL_TEMP_RPM_BUF_SIZE    10
 
 Tach tacho(PA_0,4);
@@ -17,6 +17,12 @@ int arrayFallHead = 0;
 int sum = 0;
 int RPM = 0;
 int tempRPM = 0;
+int Dcycle = 0;
+
+void setDuty(int DC)
+{
+    Dcycle = DC;
+}
 
 int RPMread()
 {
@@ -42,9 +48,9 @@ int RPMcalculate()
     
 
     //Removal of high frequency taco pulses
-    // RPMcutoff = 40 * getPulseCount();
+    RPMcutoff = 40 * Dcycle;
     // RPMcutoff = 900 * log_a_to_base_b(getPulseCount(), 5);
-    RPMcutoff = 2500 * sqrt(float(getPulseCount())/100-0.035);
+    // RPMcutoff = 2500 * sqrt(float(getPulseCount())/100-0.035);
     if (spinning)
     {        
         tempRPM = tacho.getSpeed() * 60;    

@@ -13,16 +13,17 @@
 
 #include "PID.h"
 #include "TacoProcessing.h"
-#define REFRESH_RATE     50ms
+#define REFRESH_RATE     20ms
 #define LED2 PC_0
 
 #define PIDRATE 0.1 
+#define PIDRATEFAN 0.01 
 
 BusOut leds(LED1,LED2);
 TemperatureSensor TempSense(24);
 TextLCD lcd(PB_15, PB_14, PB_10, PA_8, PB_2, PB_1);
 PID controller(10, 0, 0, PIDRATE);
-PID speed(0.1, 0.000, 0, PIDRATE);
+PID speed(3, 0.00000000000000000000000000000000000, 0, PIDRATEFAN);
 bool enc_rotated = false;      // rotary encoder was rotated left or right
 int pulseCount;
 
@@ -40,7 +41,7 @@ int main()
     //pwm*100 input from 0.0 to 3.3V
     speed.setInputLimits(0, 1950);
     //Pwm output from 0.0 to 1.0
-    speed.setOutputLimits(0, 1);
+    speed.setOutputLimits(0.04, 1);
     //If there's a bias.
     speed.setBias(0);
     speed.setMode(1);
@@ -64,7 +65,7 @@ int main()
 
 
         if (getMode() == CLOSEDLOOP)
-        {
+        {            
             //PID Calculations
             controller.setSetPoint(22);
             controller.setProcessValue(TempSense.getTemperatureReading());
@@ -81,6 +82,7 @@ int main()
         else if (getMode() == OPENLOOP)
         {
             setFan(float(getPulseCount()) /100);
+            setDuty(getPulseCount());
             printf ("RPM:  %i\n\r" , RPMcalculate());
             lcd.cls();
             lcd.printf("S= %d", RPMread());
@@ -90,13 +92,15 @@ int main()
             //PID Calculations
             speed.setSetPoint(getPulseCount()*19.5);
             speed.setProcessValue(RPMcalculate());
-            setFan(speed.compute());
+            float pidOut = speed.compute();
+            setFan(pidOut);
+            setDuty(pidOut*100);
             //Display the values 
             lcd.cls();
             lcd.printf("T = %d ", getPulseCount());
             lcd.locate(0, 1);
             lcd.printf("S= %d", RPMread());
-            printf("Set Point: %i  RPM: %i  PWM value %.3f\n\r" ,int(getPulseCount()*19.5),RPMread(), speed.compute());
+            printf("Set Point: %i  RPM: %i  PWM value %.3f\n\r" ,int(getPulseCount()*19.5),RPMread(), pidOut);
 
             //fprintf(mypcFile1,"The current Temperature is %d \n" ,TempSense.getTemperatureReading());
         }
