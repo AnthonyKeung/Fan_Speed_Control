@@ -6,7 +6,6 @@
 
 #define DEBOUNCE_TIMER     100ms
 
-
 Mode mode = OPENLOOP;
 
 InterruptIn button(BUTTON1);
@@ -59,15 +58,20 @@ void setRotEncRotated(bool newVal)
     encRotated = newVal;
 }
 
-void setRotEncMax(int max)
+void setRotEncSetPoint(float setPoint)
 {
-    RotEncMax = max;
+    REnc.Set( int(2 * setPoint / RotEncRes) );
+}
+
+void setRotEncMax(float max)
+{
+    RotEncMax = 2 * max / RotEncRes;
     REnc.Set((RotEncMax-RotEncMin)/2);
 }
 
-void setRotEncMin(int min)
+void setRotEncMin(float min)
 {
-    RotEncMin = min;
+    RotEncMin = 2 * min / RotEncRes;
     REnc.Set((RotEncMax-RotEncMin)/2);
 }
 
@@ -83,10 +87,10 @@ float getPulseCount()
         REnc.Set(RotEncMax);
     }
     else if (REnc.Get() < RotEncMin) {
-    REnc.Set(RotEncMin);
+        REnc.Set(RotEncMin);
     }
     
-    return (float(REnc.Get()) * RotEncRes / 2); //2 pulses per tick
+    return (float(REnc.Get())  * RotEncRes / 2); //2 pulses per tick
 }
 
 int getMode()

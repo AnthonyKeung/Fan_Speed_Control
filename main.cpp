@@ -24,6 +24,7 @@ TextLCD lcd(PB_15, PB_14, PB_10, PA_8, PB_2, PB_1);
 PID controller(10, 0, 0, PIDRATE);
 bool enc_rotated = false;      // rotary encoder was rotated left or right
 int pulseCount;
+Mode prevMode = Mode (getMode());
 
 //Printing setup 
 BufferedSerial mypc(USBTX, USBRX);
@@ -53,7 +54,6 @@ int main()
         leds.write(getMode() + 1);  
         TempSense.read();
 
-
         if (getMode() == CLOSEDLOOP)
         {
             //PID Calculations
@@ -71,13 +71,28 @@ int main()
         }
         else if (getMode() == OPENLOOP)
         {
-            setFan(getPulseCount() /100);
+            if (prevMode != Mode (getMode()))
+            {
+                setRotEncResolution(1);
+                setRotEncMin(20);
+                setRotEncMax(100);
+                setRotEncSetPoint(60);
+            }
             printf ("RPM:  %i\n\r" , RPMcalculate());
             lcd.cls();
             lcd.printf("S= %d", RPMread());
         }
         else if (getMode() == SLOWCONTROL)
         {
+            if (prevMode != Mode (getMode()))
+            {
+                setRotEncResolution(0.1);
+                setRotEncMin(3.8);
+                setRotEncMax(20);
+                setRotEncSetPoint(8);
+                setFan(1);
+                ThisThread::sleep_for(200ms);
+            }
             setFan(getPulseCount() /100);
             printf ("RPM:  %i\n\r" , RPMcalculate());
             lcd.cls();
@@ -90,6 +105,8 @@ int main()
             setRotEncRotated(false);
             printf ("Pulses is: %.2f\n\r", getPulseCount());
         } 
+
+        prevMode = Mode (getMode());
     
     }
 }

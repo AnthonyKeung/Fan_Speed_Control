@@ -10,9 +10,11 @@ bool getRotEncRotated();
 
 void setRotEncRotated(bool newVal);
 
-void setRotEncMax(int max);
+void setRotEncSetPoint(float setPoint);
 
-void setRotEncMin(int min);
+void setRotEncMax(float max);
+
+void setRotEncMin(float min);
 
 void setRotEncResolution(float res);
 
