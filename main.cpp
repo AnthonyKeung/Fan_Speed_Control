@@ -13,7 +13,7 @@
 
 #include "PID.h"
 #include "TacoProcessing.h"
-#define REFRESH_RATE     50ms
+#define REFRESH_RATE     200ms
 #define LED2 PC_0
 #define LED3 PB_7
 #define PIDRATE 0.1 
