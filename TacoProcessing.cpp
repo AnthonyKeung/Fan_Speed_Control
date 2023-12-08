@@ -44,7 +44,7 @@ int RPMcalculate()
     //Removal of high frequency taco pulses
     // RPMcutoff = 40 * getPulseCount();
     // RPMcutoff = 900 * log_a_to_base_b(getPulseCount(), 5);
-    RPMcutoff = 2500 * sqrt(getPulseCount()/100-0.035);
+    RPMcutoff = 2500 * sqrt(getDC()/100-0.035);
     if (spinning)
     {        
         tempRPM = tacho.getSpeed() * 60;    

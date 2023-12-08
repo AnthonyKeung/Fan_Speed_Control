@@ -3,6 +3,7 @@
 #include "Interrupts.h"
 #include "EnumDef.h"
 #include "RotaryEncoder.h"
+#include <ratio>
 
 #define DEBOUNCE_TIMER     100ms
 
@@ -19,6 +20,7 @@ bool modeChanged = true;
 int RotEncMin = 0;
 int RotEncMax = 200;
 float RotEncRes = 1;
+float duty = 0;
 
 //---------------------------------------BUTTON INTERRUPTS---------------------------------------
 
@@ -94,6 +96,23 @@ float getPulseCount()
     }
     
     return (float(REnc.Get())  * RotEncRes / 2); //2 pulses per tick
+}
+
+float getDC()
+{
+    if (mode != CLOSEDLOOP)
+    {
+        return (getPulseCount()); //2 pulses per tick
+    }
+    else
+    {
+        return (duty*100);
+    }
+}
+
+void setDuty(float dc)
+{
+    duty = dc;
 }
 
 int getMode()

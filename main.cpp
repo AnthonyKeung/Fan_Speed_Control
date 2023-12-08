@@ -96,7 +96,9 @@ int main()
             else
             {
                 controller.setProcessValue(TempSense.getTemperatureReading());
-                setFan(-1*controller.compute());
+                float duty = -1*controller.compute();
+                setDuty(duty);
+                setFan(duty);
 
                 //Display the values 
                 lcd.cls();

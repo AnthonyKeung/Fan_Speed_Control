@@ -20,6 +20,10 @@ void setRotEncResolution(float res);
 
 float getPulseCount();
 
+float getDC();
+
+void setDuty(float dc);
+
 int getMode();
 
 bool getModeChanged();
