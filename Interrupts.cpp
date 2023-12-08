@@ -7,6 +7,7 @@
 #define DEBOUNCE_TIMER     100ms
 
 Mode mode = CLOSEDLOOP;
+Mode prevMode = CLOSEDLOOP;
 
 InterruptIn button(BUTTON1);
 Timeout debounce_Button;
@@ -14,6 +15,7 @@ Timeout debounce_Button;
 mRotaryEncoder REnc(PA_1, PA_4, PC_1, PullUp, 1500);
 
 bool encRotated = false;      // rotary encoder was rotated left or right
+bool modeChanged = false;
 int RotEncMin = 0;
 int RotEncMax = 200;
 float RotEncRes = 1;
@@ -25,6 +27,7 @@ void BUTTONINTERRUPT()
     button.rise(NULL);
 
     mode = Mode (fmod((int(mode) + 1), 3));
+    modeChanged = true;
     
     debounce_Button.attach(&enable_Button, DEBOUNCE_TIMER);
 }
@@ -96,4 +99,14 @@ float getPulseCount()
 int getMode()
 {
     return int(mode);
+}
+
+bool getModeChanged()
+{
+    return modeChanged;
+}
+
+void resetModeChange()
+{
+    modeChanged = false;
 }

@@ -21,3 +21,7 @@ void setRotEncResolution(float res);
 float getPulseCount();
 
 int getMode();
+
+bool getModeChanged();
+
+void resetModeChange();
