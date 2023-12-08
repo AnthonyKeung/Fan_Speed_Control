@@ -50,11 +50,20 @@ int main()
     controller.setBias(0.3);
     controller.setMode(1);
 
-    TempSense.checkSensorConnected();
-
-    
-    while (true) 
+    while (! TempSense.checkSensorConnected())
     {
+        biLED = 1;
+        leds.write(0);
+        lcd.cls();
+        lcd.printf("TempSens");
+        lcd.locate(0, 1);
+        lcd.printf(" Failed");
+        ThisThread::sleep_for(500ms);
+    }
+    
+    biLED = 0;
+    while (true) 
+    {   
         ThisThread::sleep_for(REFRESH_RATE);
         leds.write(getMode() + 1);  
         TempSense.read();
@@ -110,7 +119,7 @@ int main()
             lcd.cls();
             lcd.printf("S= %d", RPMread());
             lcd.locate(0, 1);
-            lcd.printf("DC= %d", int(getPulseCount()));
+            lcd.printf("DC= %d%", int(getPulseCount()));
         }
         else if (getMode() == SLOWCONTROL)
         {
@@ -128,7 +137,7 @@ int main()
             lcd.cls();
             lcd.printf("S= %d", RPMread());
             lcd.locate(0, 1);
-            lcd.printf("DC= %.1f", getPulseCount());
+            lcd.printf("DC= %.1f%", getPulseCount());
         }
 
         // shaft has been rotated?
