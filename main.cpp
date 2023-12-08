@@ -65,6 +65,15 @@ int main()
 
         if (getMode() == CLOSEDLOOP)
         {
+            if (getModeChanged())
+            {
+                modeChangeConfirm = true;
+                setRotEncResolution(1);
+                setRotEncMin(0);
+                setRotEncMax(40);
+                setRotEncSetPoint(targetTemperature);
+            }
+
             if (getRotEncRotated())
             {
                 if (getPulseCount() > 0 && getPulseCount() < 40)
@@ -91,7 +100,7 @@ int main()
 
                 //Display the values 
                 lcd.cls();
-                lcd.printf("T = %d ", TempSense.getTemperatureReading());
+                lcd.printf("CT = %d ", TempSense.getTemperatureReading());
                 lcd.locate(0, 1);
                 lcd.printf("S= %d", RPM);
             }

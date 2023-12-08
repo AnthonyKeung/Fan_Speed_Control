@@ -7,7 +7,7 @@
 #define DEBOUNCE_TIMER     100ms
 
 Mode mode = CLOSEDLOOP;
-Mode prevMode = CLOSEDLOOP;
+Mode prevMode = SLOWCONTROL;
 
 InterruptIn button(BUTTON1);
 Timeout debounce_Button;
@@ -15,7 +15,7 @@ Timeout debounce_Button;
 mRotaryEncoder REnc(PA_1, PA_4, PC_1, PullUp, 1500);
 
 bool encRotated = false;      // rotary encoder was rotated left or right
-bool modeChanged = false;
+bool modeChanged = true;
 int RotEncMin = 0;
 int RotEncMax = 200;
 float RotEncRes = 1;
