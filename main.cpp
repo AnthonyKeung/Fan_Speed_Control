@@ -26,7 +26,13 @@ PID controller(10, 0.01, 0, PIDRATE);
 bool modeChangeConfirm = false;
 int pulseCount;
 int targetTemperature = 24;
+bool showTT = false;
+Timeout TTscreen;
 
+void disableTT()
+{
+    showTT = false;
+}
 
 int main()
 {
@@ -91,7 +97,9 @@ int main()
                 controller.setSetPoint(targetTemperature);
                 lcd.cls();
                 lcd.printf("TT = %d ", targetTemperature);
-                ThisThread::sleep_for(1s);
+                //ThisThread::sleep_for(1s);
+                showTT = true;
+                TTscreen.attach(&disableTT, 1s);
             }
             else
             {
@@ -100,11 +108,14 @@ int main()
                 setDuty(duty);
                 setFan(duty);
 
-                //Display the values 
-                lcd.cls();
-                lcd.printf("CT = %d ", TempSense.getTemperatureReading());
-                lcd.locate(0, 1);
-                lcd.printf("S= %d", RPM);
+                if (!showTT)
+                {
+                    //Display the values 
+                    lcd.cls();
+                    lcd.printf("CT = %d ", TempSense.getTemperatureReading());
+                    lcd.locate(0, 1);
+                    lcd.printf("S= %d", RPM);
+                }
             }
         }
         else if (getMode() == OPENLOOP)
