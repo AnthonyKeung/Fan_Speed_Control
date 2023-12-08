@@ -3,11 +3,12 @@
 #include "Interrupts.h"
 #include "EnumDef.h"
 #include "RotaryEncoder.h"
+#include <ratio>
 
 #define DEBOUNCE_TIMER     100ms
 
 Mode mode = CLOSEDLOOP;
-Mode prevMode = CLOSEDLOOP;
+Mode prevMode = SLOWCONTROL;
 
 InterruptIn button(BUTTON1);
 Timeout debounce_Button;
@@ -15,10 +16,11 @@ Timeout debounce_Button;
 mRotaryEncoder REnc(PA_1, PA_4, PC_1, PullUp, 1500);
 
 bool encRotated = false;      // rotary encoder was rotated left or right
-bool modeChanged = false;
+bool modeChanged = true;
 int RotEncMin = 0;
 int RotEncMax = 200;
 float RotEncRes = 1;
+float duty = 0;
 
 //---------------------------------------BUTTON INTERRUPTS---------------------------------------
 
@@ -94,6 +96,23 @@ float getPulseCount()
     }
     
     return (float(REnc.Get())  * RotEncRes / 2); //2 pulses per tick
+}
+
+float getDC()
+{
+    if (mode != CLOSEDLOOP)
+    {
+        return (getPulseCount()); //2 pulses per tick
+    }
+    else
+    {
+        return (duty*100);
+    }
+}
+
+void setDuty(float dc)
+{
+    duty = dc;
 }
 
 int getMode()

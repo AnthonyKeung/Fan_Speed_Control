@@ -13,7 +13,7 @@
 
 #include "PID.h"
 #include "TacoProcessing.h"
-#define REFRESH_RATE     50ms
+#define REFRESH_RATE     200ms
 #define LED2 PC_0
 #define LED3 PB_7
 #define PIDRATE 0.1 
@@ -65,6 +65,15 @@ int main()
 
         if (getMode() == CLOSEDLOOP)
         {
+            if (getModeChanged())
+            {
+                modeChangeConfirm = true;
+                setRotEncResolution(1);
+                setRotEncMin(0);
+                setRotEncMax(40);
+                setRotEncSetPoint(targetTemperature);
+            }
+
             if (getRotEncRotated())
             {
                 if (getPulseCount() > 0 && getPulseCount() < 40)
@@ -87,11 +96,13 @@ int main()
             else
             {
                 controller.setProcessValue(TempSense.getTemperatureReading());
-                setFan(-1*controller.compute());
+                float duty = -1*controller.compute();
+                setDuty(duty);
+                setFan(duty);
 
                 //Display the values 
                 lcd.cls();
-                lcd.printf("T = %d ", TempSense.getTemperatureReading());
+                lcd.printf("CT = %d ", TempSense.getTemperatureReading());
                 lcd.locate(0, 1);
                 lcd.printf("S= %d", RPM);
             }
