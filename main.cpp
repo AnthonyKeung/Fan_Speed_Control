@@ -25,10 +25,12 @@ PID controller(10, 0, 0, PIDRATE);
 bool enc_rotated = false;      // rotary encoder was rotated left or right
 int pulseCount;
 Mode prevMode = Mode (getMode());
+int targetTemperature = 24;
 
 //Printing setup 
 BufferedSerial mypc(USBTX, USBRX);
 FILE* mypcFile1 = fdopen(&mypc, "r+");
+
 
 int main()
 {
@@ -37,7 +39,7 @@ int main()
     enableRotaryEncoder();
     setPeriodms(5);
 
-    //Analog input from 0.0 to 3.3V
+    //Analog input from 0.0 t0 40 degrees
     controller.setInputLimits(0, 40);
     //Pwm output from 0.0 to 1.0
     controller.setOutputLimits(-1, 0);
@@ -56,18 +58,38 @@ int main()
 
         if (getMode() == CLOSEDLOOP)
         {
-            //PID Calculations
-            controller.setSetPoint(22);
-            controller.setProcessValue(TempSense.getTemperatureReading());
-            setFan(-1*controller.compute());
+            if (getRotEncRotated())
+            {
+                if (getPulseCount() > 0 && getPulseCount() < 40)
+                {
+                    targetTemperature = getPulseCount();
+                }
+                else if (getPulseCount() >= 40) 
+                {
+                    targetTemperature = 40;
+                }
+                else 
+                {
+                    targetTemperature = 0;
+                }
+                controller.setSetPoint(targetTemperature);
+                lcd.cls();
+                lcd.printf("TT = %d ", targetTemperature);
+                 fprintf(mypcFile1,"The desired Temperature is %d \n" , targetTemperature);
+            }
+            else
+            {
+                controller.setProcessValue(TempSense.getTemperatureReading());
+                setFan(-1*controller.compute());
 
-            //Display the values 
-            lcd.cls();
-            lcd.printf("T = %d ", TempSense.getTemperatureReading());
-            lcd.locate(0, 1);
-            lcd.printf("S= %d", RPMcalculate());
-            printf("PWM value %f" , -1*controller.compute());
-            fprintf(mypcFile1,"The current Temperature is %d \n" ,TempSense.getTemperatureReading());
+                //Display the values 
+                lcd.cls();
+                lcd.printf("T = %d ", TempSense.getTemperatureReading());
+                lcd.locate(0, 1);
+                lcd.printf("S= %d", RPM);
+                printf("PWM value %f" , -1*controller.compute());
+                fprintf(mypcFile1,"The current Temperature is %d \n" ,TempSense.getTemperatureReading());
+            }
         }
         else if (getMode() == OPENLOOP)
         {
