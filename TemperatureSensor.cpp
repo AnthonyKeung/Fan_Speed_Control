@@ -27,13 +27,11 @@ bool TemperatureSensor::checkSensorConnected()
     if (!i2c.write(TemperatureSensorAddress, NULL, 0)) 
     { // 0 returned is ok
         lcd.cls();
-        printf( "Temp sensor is succesfully connected \n");
         lcd.printf("Succesful");
         return true;
     }
     else
     {
-        printf( "Temp sensor failed to connected \n");
         lcd.printf("Fail");
         return false;
     }

@@ -16,7 +16,6 @@
 #define REFRESH_RATE     50ms
 #define LED2 PC_0
 #define LED3 PB_7
-
 #define PIDRATE 0.1 
 
 DigitalOut biLED(PA_15);
@@ -27,10 +26,6 @@ PID controller(10, 0, 0, PIDRATE);
 bool modeChangeConfirm = false;
 int pulseCount;
 int targetTemperature = 24;
-
-//Printing setup 
-BufferedSerial mypc(USBTX, USBRX);
-FILE* mypcFile1 = fdopen(&mypc, "r+");
 
 
 int main()
@@ -88,7 +83,6 @@ int main()
                 lcd.cls();
                 lcd.printf("TT = %d ", targetTemperature);
                 ThisThread::sleep_for(1s);
-                fprintf(mypcFile1,"The desired Temperature is %d \n" , targetTemperature);
             }
             else
             {
@@ -100,8 +94,6 @@ int main()
                 lcd.printf("T = %d ", TempSense.getTemperatureReading());
                 lcd.locate(0, 1);
                 lcd.printf("S= %d", RPM);
-                printf("PWM value %f" , -1*controller.compute());
-                fprintf(mypcFile1,"The current Temperature is %d \n" ,TempSense.getTemperatureReading());
             }
         }
         else if (getMode() == OPENLOOP)
@@ -115,7 +107,6 @@ int main()
                 setRotEncSetPoint(60);
             }
             setFan(getPulseCount() /100);
-            printf ("RPM:  %i\n\r" , RPM);
             lcd.cls();
             lcd.printf("S= %d", RPMread());
             lcd.locate(0, 1);
@@ -134,7 +125,6 @@ int main()
                 ThisThread::sleep_for(200ms);
             }
             setFan(getPulseCount() /100);
-            printf ("RPM:  %i\n\r" , RPM);
             lcd.cls();
             lcd.printf("S= %d", RPMread());
             lcd.locate(0, 1);
@@ -145,7 +135,6 @@ int main()
         if (getRotEncRotated()) 
         {
             setRotEncRotated(false);
-            printf ("Pulses is: %.2f\n\r", getPulseCount());
         } 
 
         if (modeChangeConfirm)
