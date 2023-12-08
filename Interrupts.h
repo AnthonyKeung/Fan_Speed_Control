@@ -10,6 +10,14 @@ bool getRotEncRotated();
 
 void setRotEncRotated(bool newVal);
 
-int getPulseCount();
+void setRotEncSetPoint(float setPoint);
+
+void setRotEncMax(float max);
+
+void setRotEncMin(float min);
+
+void setRotEncResolution(float res);
+
+float getPulseCount();
 
 int getMode();

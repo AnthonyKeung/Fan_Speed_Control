@@ -6,13 +6,17 @@
 
 #define DEBOUNCE_TIMER     100ms
 
-Mode mode = CLOSEDLOOP;
+Mode mode = OPENLOOP;
 
 InterruptIn button(BUTTON1);
 Timeout debounce_Button;
 
 mRotaryEncoder REnc(PA_1, PA_4, PC_1, PullUp, 1500);
+
 bool encRotated = false;      // rotary encoder was rotated left or right
+int RotEncMin = 0;
+int RotEncMax = 200;
+float RotEncRes = 1;
 
 //---------------------------------------BUTTON INTERRUPTS---------------------------------------
 
@@ -40,6 +44,7 @@ void ROTENCINTERRUPT()
 void enableRotaryEncoder() // define function called in BUTTONINTERRUPT
 {
     REnc.attachROT(&ROTENCINTERRUPT);
+    REnc.Set((RotEncMax-RotEncMin)/2);
 }
 //---------------------------------------GETTERS---------------------------------------
 
@@ -53,17 +58,39 @@ void setRotEncRotated(bool newVal)
     encRotated = newVal;
 }
 
-int getPulseCount()
+void setRotEncSetPoint(float setPoint)
 {
-    if (REnc.Get() > 100)
+    REnc.Set( int(2 * setPoint / RotEncRes) );
+}
+
+void setRotEncMax(float max)
+{
+    RotEncMax = 2 * max / RotEncRes;
+    REnc.Set((RotEncMax-RotEncMin)/2);
+}
+
+void setRotEncMin(float min)
+{
+    RotEncMin = 2 * min / RotEncRes;
+    REnc.Set((RotEncMax-RotEncMin)/2);
+}
+
+void setRotEncResolution(float res)
+{
+    RotEncRes = res;
+}
+
+float getPulseCount()
+{
+    if (REnc.Get() > RotEncMax)
     {
-        REnc.Set(100);
+        REnc.Set(RotEncMax);
     }
-    else if (REnc.Get() < 0) {
-    REnc.Set(0);
+    else if (REnc.Get() < RotEncMin) {
+        REnc.Set(RotEncMin);
     }
     
-    return REnc.Get();
+    return (float(REnc.Get())  * RotEncRes / 2); //2 pulses per tick
 }
 
 int getMode()
