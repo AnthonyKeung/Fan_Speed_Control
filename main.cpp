@@ -24,7 +24,6 @@ BusOut leds(LED3,LED2);
 TemperatureSensor TempSense(24);
 TextLCD lcd(PB_15, PB_14, PB_10, PA_8, PB_2, PB_1);
 PID controller(10, 0, 0, PIDRATE);
-bool enc_rotated = false;      // rotary encoder was rotated left or right
 bool modeChangeConfirm = false;
 int pulseCount;
 int targetTemperature = 24;
