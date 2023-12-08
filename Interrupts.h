@@ -20,4 +20,8 @@ void setRotEncResolution(float res);
 
 float getPulseCount();
 
+void setPrevMode(int pmode);
+
 int getMode();
+
+int getPrevMode();

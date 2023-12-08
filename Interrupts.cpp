@@ -7,6 +7,7 @@
 #define DEBOUNCE_TIMER     100ms
 
 Mode mode = CLOSEDLOOP;
+Mode prevMode = CLOSEDLOOP;
 
 InterruptIn button(BUTTON1);
 Timeout debounce_Button;
@@ -96,4 +97,14 @@ float getPulseCount()
 int getMode()
 {
     return int(mode);
+}
+
+int getPrevMode()
+{
+    return int(prevMode);
+}
+
+void setPrevMode(int pmode)
+{
+    prevMode = Mode (pmode);
 }
