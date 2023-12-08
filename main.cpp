@@ -15,10 +15,12 @@
 #include "TacoProcessing.h"
 #define REFRESH_RATE     50ms
 #define LED2 PC_0
+#define LED3 PB_7
 
 #define PIDRATE 0.1 
 
-BusOut leds(LED1,LED2);
+DigitalOut biLED(PA_15);
+BusOut leds(LED3,LED2);
 TemperatureSensor TempSense(24);
 TextLCD lcd(PB_15, PB_14, PB_10, PA_8, PB_2, PB_1);
 PID controller(10, 0, 0, PIDRATE);
@@ -34,6 +36,7 @@ FILE* mypcFile1 = fdopen(&mypc, "r+");
 
 int main()
 {
+    biLED = 0;
     leds.write(0x0);
     enable_Button();
     enableRotaryEncoder();
