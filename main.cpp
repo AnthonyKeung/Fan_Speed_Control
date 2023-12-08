@@ -55,6 +55,7 @@ int main()
         ThisThread::sleep_for(REFRESH_RATE);
         leds.write(getMode() + 1);  
         TempSense.read();
+        int RPM = RPMcalculate();
 
         if (getMode() == CLOSEDLOOP)
         {
@@ -75,7 +76,8 @@ int main()
                 controller.setSetPoint(targetTemperature);
                 lcd.cls();
                 lcd.printf("TT = %d ", targetTemperature);
-                 fprintf(mypcFile1,"The desired Temperature is %d \n" , targetTemperature);
+                ThisThread::sleep_for(1s);
+                fprintf(mypcFile1,"The desired Temperature is %d \n" , targetTemperature);
             }
             else
             {
@@ -101,9 +103,11 @@ int main()
                 setRotEncSetPoint(60);
             }
             setFan(getPulseCount() /100);
-            printf ("RPM:  %i\n\r" , RPMcalculate());
+            printf ("RPM:  %i\n\r" , RPM);
             lcd.cls();
             lcd.printf("S= %d", RPMread());
+            lcd.locate(0, 1);
+            lcd.printf("DC= %d", int(getPulseCount()));
         }
         else if (getMode() == SLOWCONTROL)
         {
@@ -117,9 +121,11 @@ int main()
                 ThisThread::sleep_for(200ms);
             }
             setFan(getPulseCount() /100);
-            printf ("RPM:  %i\n\r" , RPMcalculate());
+            printf ("RPM:  %i\n\r" , RPM);
             lcd.cls();
             lcd.printf("S= %d", RPMread());
+            lcd.locate(0, 1);
+            lcd.printf("DC= %.1f", getPulseCount());
         }
 
         // shaft has been rotated?

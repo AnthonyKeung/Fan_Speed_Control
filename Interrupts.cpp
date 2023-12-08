@@ -6,7 +6,7 @@
 
 #define DEBOUNCE_TIMER     100ms
 
-Mode mode = OPENLOOP;
+Mode mode = CLOSEDLOOP;
 
 InterruptIn button(BUTTON1);
 Timeout debounce_Button;
