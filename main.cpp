@@ -118,7 +118,7 @@ int main()
             {
                 modeChangeConfirm = true;
                 setRotEncResolution(0.1);
-                setRotEncMin(3.8);
+                setRotEncMin(4);
                 setRotEncMax(20);
                 setRotEncSetPoint(8);
                 setFan(1);
