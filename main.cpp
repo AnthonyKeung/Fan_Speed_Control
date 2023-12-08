@@ -78,6 +78,7 @@ int main()
                 setRotEncMax(100);
                 setRotEncSetPoint(60);
             }
+            setFan(getPulseCount() /100);
             printf ("RPM:  %i\n\r" , RPMcalculate());
             lcd.cls();
             lcd.printf("S= %d", RPMread());
